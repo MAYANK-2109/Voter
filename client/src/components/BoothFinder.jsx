@@ -59,7 +59,7 @@ export default function BoothFinder() {
     const fetchInsight = async () => {
       setLoadingInsight(true);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/booth-status/${selectedBooth.id}/insights`);
+        const response = await fetch(`/api/booth-status/${selectedBooth.id}/insights`);
         const data = await response.json();
         setInsight(data);
       } catch (error) {
