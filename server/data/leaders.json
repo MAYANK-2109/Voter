@@ -1,0 +1,301 @@
+{
+  "states": {
+    "Andhra Pradesh": {
+      "cm": { "name": "N. Chandrababu Naidu", "party": "TDP", "since": "2024", "image": "naidu" },
+      "governor": { "name": "S. Abdul Nazeer", "role": "Governor" },
+      "cities": {
+        "Visakhapatnam": { "mp": { "name": "Sribharat Mathukumili", "party": "TDP" } },
+        "Vijayawada": { "mp": { "name": "Kesineni Sivanath", "party": "TDP" } },
+        "Tirupati": { "mp": { "name": "M. Gurumoorthy", "party": "TDP" } },
+        "Amaravati": {}
+      }
+    },
+    "Arunachal Pradesh": {
+      "cm": { "name": "Pema Khandu", "party": "BJP", "since": "2016", "image": "khandu" },
+      "governor": { "name": "K.T. Parnaik", "role": "Governor" },
+      "cities": {
+        "Itanagar": {}
+      }
+    },
+    "Assam": {
+      "cm": { "name": "Himanta Biswa Sarma", "party": "BJP", "since": "2021", "image": "sarma" },
+      "governor": { "name": "Lakshman Prasad Acharya", "role": "Governor" },
+      "cities": {
+        "Guwahati": { "mp": { "name": "Bijuli Kalita Medhi", "party": "BJP" } },
+        "Dibrugarh": { "mp": { "name": "Sarbananda Sonowal", "party": "BJP" } }
+      }
+    },
+    "Bihar": {
+      "cm": { "name": "Nitish Kumar", "party": "JDU", "since": "2024", "image": "nitish" },
+      "governor": { "name": "Arif Mohammad Khan", "role": "Governor" },
+      "cities": {
+        "Patna": { "mayor": { "name": "Sita Sahu", "party": "NDA" }, "mp": { "name": "Ravi Shankar Prasad", "party": "BJP" } },
+        "Gaya": { "mp": { "name": "Jitan Ram Manjhi", "party": "HAM" } }
+      }
+    },
+    "Chhattisgarh": {
+      "cm": { "name": "Vishnu Deo Sai", "party": "BJP", "since": "2023", "image": "sai" },
+      "governor": { "name": "Ramen Deka", "role": "Governor" },
+      "cities": {
+        "Raipur": { "mayor": { "name": "Aijaz Dhebar", "party": "BJP" }, "mp": { "name": "Brijmohan Agrawal", "party": "BJP" } },
+        "Bhilai": { "mp": { "name": "Vijay Baghel", "party": "BJP" } },
+        "Bilaspur": { "mp": { "name": "Tokhan Sahu", "party": "BJP" } },
+        "Durg": { "mp": { "name": "Vijay Baghel", "party": "BJP" } },
+        "Korba": { "mp": { "name": "Jyotsna Mahant", "party": "BJP" } }
+      }
+    },
+    "Goa": {
+      "cm": { "name": "Pramod Sawant", "party": "BJP", "since": "2022", "image": "sawant" },
+      "governor": { "name": "P.S. Sreedharan Pillai", "role": "Governor" },
+      "cities": {
+        "Panaji": { "mayor": { "name": "Rohit Monserrate", "party": "BJP" } },
+        "Margao": {}
+      }
+    },
+    "Gujarat": {
+      "cm": { "name": "Bhupendra Patel", "party": "BJP", "since": "2022", "image": "patel" },
+      "governor": { "name": "Acharya Devvrat", "role": "Governor" },
+      "cities": {
+        "Ahmedabad": { "mayor": { "name": "Pratibha Jain", "party": "BJP" }, "mp": { "name": "Hasmukhbhai Patel", "party": "BJP" } },
+        "Surat": { "mayor": { "name": "Daxesh Maniar", "party": "BJP" }, "mp": { "name": "Mukesh Dalal", "party": "BJP" } },
+        "Vadodara": { "mp": { "name": "Hemang Joshi", "party": "BJP" } },
+        "Rajkot": { "mp": { "name": "Parshottam Rupala", "party": "BJP" } }
+      }
+    },
+    "Haryana": {
+      "cm": { "name": "Nayab Singh Saini", "party": "BJP", "since": "2024", "image": "saini" },
+      "governor": { "name": "Bandaru Dattatreya", "role": "Governor" },
+      "cities": {
+        "Chandigarh": {},
+        "Gurugram": { "mp": { "name": "Rao Inderjit Singh", "party": "BJP" } },
+        "Faridabad": { "mp": { "name": "Krishan Pal Gurjar", "party": "BJP" } }
+      }
+    },
+    "Himachal Pradesh": {
+      "cm": { "name": "Sukhvinder Singh Sukhu", "party": "INC", "since": "2022", "image": "sukhu" },
+      "governor": { "name": "Shiv Pratap Shukla", "role": "Governor" },
+      "cities": {
+        "Shimla": { "mayor": { "name": "Surendra Chauhan", "party": "INC" } },
+        "Dharamshala": {}
+      }
+    },
+    "Jharkhand": {
+      "cm": { "name": "Hemant Soren", "party": "JMM", "since": "2024", "image": "soren" },
+      "governor": { "name": "Santosh Kumar Gangwar", "role": "Governor" },
+      "cities": {
+        "Ranchi": { "mayor": { "name": "Asha Lakra", "party": "BJP" }, "mp": { "name": "Sanjay Seth", "party": "BJP" } },
+        "Jamshedpur": { "mp": { "name": "Bidyut Baran Mahato", "party": "JMM" } }
+      }
+    },
+    "Karnataka": {
+      "cm": { "name": "Siddaramaiah", "party": "INC", "since": "2023", "image": "siddaramaiah" },
+      "governor": { "name": "Thaawarchand Gehlot", "role": "Governor" },
+      "cities": {
+        "Bengaluru": { "mayor": { "name": "Appointed Commissioner", "party": "BBMP" }, "mp": { "name": "P.C. Mohan", "party": "BJP" } },
+        "Mysuru": { "mp": { "name": "Yaduveer Krishnadatta Chamaraja Wadiyar", "party": "BJP" } },
+        "Mangaluru": { "mp": { "name": "Captain Brijesh Chowta", "party": "BJP" } }
+      }
+    },
+    "Kerala": {
+      "cm": { "name": "Pinarayi Vijayan", "party": "CPI(M)", "since": "2021", "image": "vijayan" },
+      "governor": { "name": "Rajendra Vishwanath Arlekar", "role": "Governor" },
+      "cities": {
+        "Thiruvananthapuram": { "mayor": { "name": "Arya Rajendran", "party": "CPI(M)" }, "mp": { "name": "Shashi Tharoor", "party": "INC" } },
+        "Kochi": { "mp": { "name": "Hibi Eden", "party": "INC" } },
+        "Kozhikode": { "mp": { "name": "M.K. Raghavan", "party": "INC" } }
+      }
+    },
+    "Madhya Pradesh": {
+      "cm": { "name": "Mohan Yadav", "party": "BJP", "since": "2023", "image": "mohanyadav" },
+      "governor": { "name": "Mangubhai C. Patel", "role": "Governor" },
+      "cities": {
+        "Bhopal": { "mayor": { "name": "Malti Rai", "party": "BJP" }, "mp": { "name": "Alok Sharma", "party": "BJP" } },
+        "Indore": { "mayor": { "name": "Pushyamitra Bhargav", "party": "BJP" }, "mp": { "name": "Lalwani Vedant", "party": "BJP" } },
+        "Jabalpur": { "mp": { "name": "Sharad Jain", "party": "BJP" } },
+        "Gwalior": { "mp": { "name": "Bharat Singh Kushwah", "party": "BJP" } }
+      }
+    },
+    "Maharashtra": {
+      "cm": { "name": "Devendra Fadnavis", "party": "BJP", "since": "2024", "image": "fadnavis" },
+      "governor": { "name": "C.P. Radhakrishnan", "role": "Governor" },
+      "cities": {
+        "Mumbai": { "mayor": { "name": "BMC Administrator", "party": "" }, "mp": { "name": "Piyush Goyal", "party": "BJP" } },
+        "Pune": { "mayor": { "name": "PMC Administrator", "party": "" }, "mp": { "name": "Murlidhar Mohol", "party": "BJP" } },
+        "Nagpur": { "mayor": { "name": "NMC Administrator", "party": "" }, "mp": { "name": "Nitin Gadkari", "party": "BJP" } },
+        "Nashik": { "mp": { "name": "Rajabhau Waje", "party": "Shiv Sena" } },
+        "Thane": { "mp": { "name": "Naresh Mhaske", "party": "Shiv Sena" } }
+      }
+    },
+    "Manipur": {
+      "cm": { "name": "N. Biren Singh", "party": "BJP", "since": "2022", "image": "biren" },
+      "governor": { "name": "Ajay Kumar Bhalla", "role": "Governor" },
+      "cities": {
+        "Imphal": {}
+      }
+    },
+    "Meghalaya": {
+      "cm": { "name": "Conrad Sangma", "party": "NPP", "since": "2023", "image": "conrad" },
+      "governor": { "name": "C.H. Vijayashankar", "role": "Governor" },
+      "cities": {
+        "Shillong": { "mp": { "name": "Vincent H. Pala", "party": "INC" } }
+      }
+    },
+    "Mizoram": {
+      "cm": { "name": "Lalduhoma", "party": "ZPM", "since": "2023", "image": "lalduhoma" },
+      "governor": { "name": "Hari Babu Kambhampati", "role": "Governor" },
+      "cities": {
+        "Aizawl": {}
+      }
+    },
+    "Nagaland": {
+      "cm": { "name": "Neiphiu Rio", "party": "NDPP", "since": "2023", "image": "rio" },
+      "governor": { "name": "La Ganesan", "role": "Governor" },
+      "cities": {
+        "Kohima": {},
+        "Dimapur": {}
+      }
+    },
+    "Odisha": {
+      "cm": { "name": "Mohan Charan Majhi", "party": "BJP", "since": "2024", "image": "majhi" },
+      "governor": { "name": "Raghubar Das", "role": "Governor" },
+      "cities": {
+        "Bhubaneswar": { "mp": { "name": "Aparajita Sarangi", "party": "BJP" } },
+        "Cuttack": { "mp": { "name": "Bhartruhari Mahtab", "party": "BJP" } }
+      }
+    },
+    "Punjab": {
+      "cm": { "name": "Bhagwant Mann", "party": "AAP", "since": "2022", "image": "mann" },
+      "governor": { "name": "Gulab Chand Kataria", "role": "Governor" },
+      "cities": {
+        "Chandigarh": {},
+        "Ludhiana": { "mp": { "name": "Ravneet Singh Bittu", "party": "BJP" } },
+        "Amritsar": { "mp": { "name": "Kuldeep Singh Dhaliwal", "party": "AAP" } }
+      }
+    },
+    "Rajasthan": {
+      "cm": { "name": "Bhajan Lal Sharma", "party": "BJP", "since": "2023", "image": "bhajanlal" },
+      "governor": { "name": "Haribhau Kisanrao Bagde", "role": "Governor" },
+      "cities": {
+        "Jaipur": { "mayor": { "name": "Munesh Gurjar", "party": "BJP" }, "mp": { "name": "Manju Sharma", "party": "BJP" } },
+        "Jodhpur": { "mp": { "name": "Gajendra Singh Shekhawat", "party": "BJP" } },
+        "Udaipur": { "mp": { "name": "Mannalal Rawat", "party": "BJP" } }
+      }
+    },
+    "Sikkim": {
+      "cm": { "name": "Prem Singh Tamang", "party": "SKM", "since": "2024", "image": "tamang" },
+      "governor": { "name": "Om Prakash Mathur", "role": "Governor" },
+      "cities": {
+        "Gangtok": {}
+      }
+    },
+    "Tamil Nadu": {
+      "cm": { "name": "M.K. Stalin", "party": "DMK", "since": "2021", "image": "stalin" },
+      "governor": { "name": "R.N. Ravi", "role": "Governor" },
+      "cities": {
+        "Chennai": { "mayor": { "name": "R. Priya", "party": "DMK" }, "mp": { "name": "Dayanidhi Maran", "party": "DMK" } },
+        "Coimbatore": { "mp": { "name": "Ganapathi P. Rajkumar", "party": "DMK" } },
+        "Madurai": { "mp": { "name": "Su. Venkatesan", "party": "CPI(M)" } },
+        "Tiruchirappalli": { "mp": { "name": "Dhanush M. Kumar", "party": "DMK" } }
+      }
+    },
+    "Telangana": {
+      "cm": { "name": "A. Revanth Reddy", "party": "INC", "since": "2023", "image": "revanth" },
+      "governor": { "name": "Jishnu Dev Varma", "role": "Governor" },
+      "cities": {
+        "Hyderabad": { "mayor": { "name": "Gadwal Vijayalakshmi", "party": "BRS" }, "mp": { "name": "Asaduddin Owaisi", "party": "AIMIM" } },
+        "Warangal": { "mp": { "name": "Kadiyam Kavya", "party": "INC" } },
+        "Secunderabad": { "mp": { "name": "G. Kishan Reddy", "party": "BJP" } }
+      }
+    },
+    "Tripura": {
+      "cm": { "name": "Manik Saha", "party": "BJP", "since": "2023", "image": "saha" },
+      "governor": { "name": "Indra Sena Reddy Nallu", "role": "Governor" },
+      "cities": {
+        "Agartala": { "mayor": { "name": "Dipak Majumder", "party": "BJP" } }
+      }
+    },
+    "Uttar Pradesh": {
+      "cm": { "name": "Yogi Adityanath", "party": "BJP", "since": "2022", "image": "yogi" },
+      "governor": { "name": "Anandiben Patel", "role": "Governor" },
+      "cities": {
+        "Lucknow": { "mayor": { "name": "Sushma Khari", "party": "BJP" }, "mp": { "name": "Rajnath Singh", "party": "BJP" } },
+        "Varanasi": { "mp": { "name": "Narendra Modi", "party": "BJP" } },
+        "Kanpur": { "mp": { "name": "Ramesh Awasthi", "party": "BJP" } },
+        "Noida": {},
+        "Agra": { "mp": { "name": "S.P. Singh Baghel", "party": "BJP" } },
+        "Prayagraj": { "mp": { "name": "Nand Gopal Gupta", "party": "BJP" } }
+      }
+    },
+    "Uttarakhand": {
+      "cm": { "name": "Pushkar Singh Dhami", "party": "BJP", "since": "2022", "image": "dhami" },
+      "governor": { "name": "Lt Gen Gurmit Singh", "role": "Governor" },
+      "cities": {
+        "Dehradun": { "mayor": { "name": "Sunil Uniyal Gama", "party": "BJP" }, "mp": { "name": "Anil Baluni", "party": "BJP" } },
+        "Haridwar": { "mp": { "name": "Trivendra Singh Rawat", "party": "BJP" } }
+      }
+    },
+    "West Bengal": {
+      "cm": { "name": "Mamata Banerjee", "party": "AITC", "since": "2021", "image": "mamata" },
+      "governor": { "name": "C.V. Ananda Bose", "role": "Governor" },
+      "cities": {
+        "Kolkata": { "mayor": { "name": "Firhad Hakim", "party": "AITC" }, "mp": { "name": "Sudip Bandyopadhyay", "party": "AITC" } },
+        "Howrah": { "mp": { "name": "Prasun Banerjee", "party": "AITC" } },
+        "Siliguri": { "mayor": { "name": "Gautam Deb", "party": "AITC" } }
+      }
+    },
+    "Delhi": {
+      "cm": { "name": "Atishi", "party": "AAP", "since": "2024", "image": "atishi" },
+      "governor": { "name": "V.K. Saxena", "role": "Lt. Governor" },
+      "cities": {
+        "New Delhi": { "mp": { "name": "Bansuri Swaraj", "party": "BJP" } },
+        "Delhi": { "mp": { "name": "Praveen Khandelwal", "party": "BJP" } }
+      }
+    },
+    "Jammu and Kashmir": {
+      "cm": { "name": "Omar Abdullah", "party": "NC", "since": "2024", "image": "omar" },
+      "governor": { "name": "Manoj Sinha", "role": "Lt. Governor" },
+      "cities": {
+        "Srinagar": { "mp": { "name": "Aga Syed Ruhullah Mehdi", "party": "NC" } },
+        "Jammu": { "mp": { "name": "Jugal Kishore Sharma", "party": "BJP" } }
+      }
+    },
+    "Puducherry": {
+      "cm": { "name": "N. Rangasamy", "party": "AINRC", "since": "2021", "image": "rangasamy" },
+      "governor": { "name": "K. Kailashnathan", "role": "Lt. Governor" },
+      "cities": {
+        "Puducherry": { "mp": { "name": "S. Selvaganapathy", "party": "AINRC" } }
+      }
+    },
+    "Chandigarh": {
+      "governor": { "name": "Gulab Chand Kataria", "role": "Administrator" },
+      "cities": {
+        "Chandigarh": { "mayor": { "name": "Kuldeep Kumar", "party": "AAP" }, "mp": { "name": "Manish Tewari", "party": "INC" } }
+      }
+    },
+    "Ladakh": {
+      "governor": { "name": "B.D. Mishra", "role": "Lt. Governor" },
+      "cities": {
+        "Leh": { "mp": { "name": "Mohmad Haneefa", "party": "INC" } }
+      }
+    },
+    "Andaman and Nicobar Islands": {
+      "governor": { "name": "D.K. Joshi", "role": "Lt. Governor" },
+      "cities": {
+        "Port Blair": { "mp": { "name": "Bishnupada Ray", "party": "BJP" } }
+      }
+    },
+    "Dadra and Nagar Haveli and Daman and Diu": {
+      "governor": { "name": "Praful Patel", "role": "Administrator" },
+      "cities": {
+        "Daman": {},
+        "Silvassa": {}
+      }
+    },
+    "Lakshadweep": {
+      "governor": { "name": "Praful Patel", "role": "Administrator" },
+      "cities": {
+        "Kavaratti": { "mp": { "name": "Mohammed Faizal P.P.", "party": "NCP" } }
+      }
+    }
+  }
+}
