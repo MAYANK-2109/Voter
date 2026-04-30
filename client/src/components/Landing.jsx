@@ -109,11 +109,7 @@ export default function Landing() {
           >
             <div className="absolute inset-0 bg-saffron/10 rounded-[2rem] blur-3xl -z-10" />
             <div className="p-2 bg-gradient-to-br from-saffron/20 via-white to-india-green/20 rounded-[2.2rem] shadow-2xl">
-              <img
-                src="banner.jpg"
-                alt="VOTE-पथ Dashboard"
-                className="rounded-[2rem] border border-white"
-              />
+              <img src="banner.jpg" alt="VOTE-पथ Dashboard" className="rounded-[2rem]" />
             </div>
           </motion.div>
         </div>
