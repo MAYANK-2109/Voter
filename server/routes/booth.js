@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const BoothReport = require('../models/BoothReport');
+const BoothInsight = require('../models/BoothInsight');
 
 router.get('/', async (req, res) => {
   try {
@@ -59,6 +60,27 @@ router.patch('/:id/upvote', async (req, res) => {
     res.json(report);
   } catch (error) {
     res.status(500).json({ error: 'Failed to upvote report' });
+  }
+});
+
+router.get('/:id/insights', async (req, res) => {
+  try {
+    const insight = await BoothInsight.findOne({ boothId: req.params.id });
+    if (!insight) {
+      // Return default or empty if not found
+      return res.json({
+        boothId: req.params.id,
+        historicalCrowdPeak: 'Not Available',
+        easeOfAccess: 'Medium',
+        amenities: [],
+        pastTurnout: 'N/A',
+        avgWaitTime: 'N/A'
+      });
+    }
+    res.json(insight);
+  } catch (error) {
+    console.error('Insight API error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch booth insights' });
   }
 });
 

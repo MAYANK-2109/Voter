@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useLocation } from '../context/LocationContext';
-import { FiMap, FiNavigation, FiInfo, FiExternalLink, FiMapPin } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { FiMap, FiNavigation, FiInfo, FiExternalLink, FiMapPin, FiClock, FiUsers, FiActivity, FiShield } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Fix for default marker icons in React-Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -47,6 +47,30 @@ export default function BoothFinder() {
   const { coords, locationData } = useLocation();
   const [booths, setBooths] = useState([]);
   const [selectedBooth, setSelectedBooth] = useState(null);
+  const [insight, setInsight] = useState(null);
+  const [loadingInsight, setLoadingInsight] = useState(false);
+
+  useEffect(() => {
+    if (!selectedBooth) {
+      setInsight(null);
+      return;
+    }
+
+    const fetchInsight = async () => {
+      setLoadingInsight(true);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/booth-status/${selectedBooth.id}/insights`);
+        const data = await response.json();
+        setInsight(data);
+      } catch (error) {
+        console.error('Error fetching insight:', error);
+      } finally {
+        setLoadingInsight(false);
+      }
+    };
+
+    fetchInsight();
+  }, [selectedBooth]);
 
   useEffect(() => {
     if (!coords?.lat) return;
@@ -186,6 +210,72 @@ export default function BoothFinder() {
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedBooth && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-6 pt-4 border-t border-slate-200"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 rounded-md bg-india-blue/10 flex items-center justify-center">
+                <FiInfo className="w-3.5 h-3.5 text-india-blue" />
+              </div>
+              <h4 className="text-xs font-bold text-text-primary">Historical Booth Insights</h4>
+            </div>
+
+            {loadingInsight ? (
+              <div className="flex justify-center py-4">
+                <div className="w-4 h-4 border-2 border-saffron border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : insight ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[9px] text-text-muted uppercase font-bold tracking-tight mb-1 flex items-center gap-1">
+                    <FiClock className="w-3 h-3 text-saffron" /> Peak Crowd Time
+                  </p>
+                  <p className="text-[11px] font-bold text-text-primary">{insight.historicalCrowdPeak}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[9px] text-text-muted uppercase font-bold tracking-tight mb-1 flex items-center gap-1">
+                    <FiActivity className="w-3 h-3 text-india-green" /> Past Turnout
+                  </p>
+                  <p className="text-[11px] font-bold text-text-primary">{insight.pastTurnout}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[9px] text-text-muted uppercase font-bold tracking-tight mb-1 flex items-center gap-1">
+                    <FiUsers className="w-3 h-3 text-india-blue" /> Avg. Wait Time
+                  </p>
+                  <p className="text-[11px] font-bold text-text-primary">{insight.avgWaitTime}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[9px] text-text-muted uppercase font-bold tracking-tight mb-1 flex items-center gap-1">
+                    <FiShield className="w-3 h-3 text-orange-500" /> Ease of Access
+                  </p>
+                  <p className="text-[11px] font-bold text-text-primary">{insight.easeOfAccess} Priority</p>
+                </div>
+                
+                {insight.amenities && insight.amenities.length > 0 && (
+                  <div className="col-span-2 p-3 rounded-xl bg-orange-50/50 border border-orange-100">
+                    <p className="text-[9px] text-text-muted uppercase font-bold tracking-tight mb-2">Available Amenities</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {insight.amenities.map((amenity, i) => (
+                        <span key={i} className="text-[9px] bg-white border border-orange-200 text-orange-700 px-2 py-0.5 rounded-full font-medium shadow-sm">
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-[10px] text-text-muted italic text-center py-2">No historical data available for this booth.</p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
