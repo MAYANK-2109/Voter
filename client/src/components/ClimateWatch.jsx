@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from '../context/LocationContext';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiSun, FiCloudRain, FiCloud, FiWind, FiDroplet, FiThermometer, FiAlertTriangle } from 'react-icons/fi';
 
 const WEATHER_ICONS = {
@@ -21,7 +21,7 @@ export default function ClimateWatch() {
     if (!coords?.lat) return;
     const fetch = async () => {
       try {
-        const res = await axios.get(`/api/weather?lat=${coords.lat}&lng=${coords.lng}`);
+        const res = await api.get(`/weather?lat=${coords.lat}&lng=${coords.lng}`);
         setWeather(res.data);
       } catch (err) {
         console.error('Weather fetch failed:', err);

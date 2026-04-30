@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { z } = require('zod');
+
+const CoordsSchema = z.object({
+  lat: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-90).max(90)),
+  lng: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-180).max(180))
+});
 
 function computeSafeWindows(temp, feelsLike, humidity) {
   const windows = [];
@@ -35,8 +41,11 @@ function computeSafeWindows(temp, feelsLike, humidity) {
 
 router.get('/', async (req, res) => {
   try {
-    const { lat, lng } = req.query;
-    if (!lat || !lng) return res.status(400).json({ error: 'lat and lng are required' });
+    const validation = CoordsSchema.safeParse(req.query);
+    if (!validation.success) {
+      return res.status(400).json({ error: 'Invalid coordinates' });
+    }
+    const { lat, lng } = validation.data;
 
     if (!process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHER_API_KEY === 'placeholder') {
       return res.status(401).json({ error: 'Weather API key missing', details: 'Please add a valid OPENWEATHER_API_KEY to your .env file' });

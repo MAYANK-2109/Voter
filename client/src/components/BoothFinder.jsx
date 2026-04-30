@@ -4,6 +4,7 @@ import L from 'leaflet';
 import { useLocation } from '../context/LocationContext';
 import { FiMap, FiNavigation, FiInfo, FiExternalLink, FiMapPin, FiClock, FiUsers, FiActivity, FiShield } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../utils/api';
 
 // Fix for default marker icons in React-Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -59,9 +60,8 @@ export default function BoothFinder() {
     const fetchInsight = async () => {
       setLoadingInsight(true);
       try {
-        const response = await fetch(`/api/booth-status/${selectedBooth.id}/insights`);
-        const data = await response.json();
-        setInsight(data);
+        const res = await api.get(`/booth-status/${selectedBooth.id}/insights`);
+        setInsight(res.data);
       } catch (error) {
         console.error('Error fetching insight:', error);
       } finally {

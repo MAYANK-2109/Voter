@@ -18,4 +18,9 @@ const boothReportSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 
+// Performance Indexes
+boothReportSchema.index({ boothId: 1 });
+boothReportSchema.index({ state: 1, city: 1 });
+boothReportSchema.index({ timestamp: -1 });
+
 module.exports = mongoose.model('BoothReport', boothReportSchema);

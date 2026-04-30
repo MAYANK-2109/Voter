@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from '../context/LocationContext';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiRadio, FiExternalLink, FiRefreshCw, FiClock } from 'react-icons/fi';
 
 export default function PulseNews() {
@@ -15,7 +15,7 @@ export default function PulseNews() {
     setError(null);
     try {
       const params = coords?.lat ? `lat=${coords.lat}&lng=${coords.lng}` : `state=${locationData?.state}`;
-      const res = await axios.get(`/api/pulse?${params}`);
+      const res = await api.get(`/pulse?${params}`);
       setArticles(res.data.articles || []);
       setIsFallback(res.data.isFallback || false);
     } catch (err) {

@@ -82,13 +82,15 @@ export default function Dashboard() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               onClick={() => setShowLocationPicker(!showLocationPicker)}
+              aria-label="Change location"
+              aria-expanded={showLocationPicker}
               className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-full hover:border-saffron transition-colors cursor-pointer shadow-sm"
             >
-              <FiMapPin className="w-3.5 h-3.5 text-saffron" />
+              <FiMapPin className="w-3.5 h-3.5 text-saffron" aria-hidden="true" />
               <span className="text-xs font-medium text-text-secondary truncate max-w-[120px] sm:max-w-none">
                 {locationData?.city || 'Unknown'}, {locationData?.state || 'Unknown'}
               </span>
-              <FiChevronDown className={`w-3 h-3 text-text-muted transition-transform ${showLocationPicker ? 'rotate-180' : ''}`} />
+              <FiChevronDown className={`w-3 h-3 text-text-muted transition-transform ${showLocationPicker ? 'rotate-180' : ''}`} aria-hidden="true" />
             </motion.button>
 
             <AnimatePresence>
@@ -104,25 +106,33 @@ export default function Dashboard() {
                     <button onClick={() => setShowLocationPicker(false)} className="text-text-muted hover:text-danger"><FiX className="w-3.5 h-3.5" /></button>
                   </div>
                   <form onSubmit={handleLocationSubmit} className="space-y-3">
-                    <input 
-                      type="text" 
-                      placeholder="City Name" 
-                      value={newCity} 
-                      onChange={e => setNewCity(e.target.value)} 
-                      className="input-glass text-xs py-2" 
-                      required 
-                    />
-                    <select 
-                      value={newState} 
-                      onChange={e => setNewState(e.target.value)} 
-                      className="select-glass text-xs py-2" 
-                      required
-                    >
-                      <option value="">Select State</option>
-                      {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <div className="space-y-1">
+                      <label htmlFor="city-input" className="sr-only">City Name</label>
+                      <input 
+                        id="city-input"
+                        type="text" 
+                        placeholder="City Name" 
+                        value={newCity} 
+                        onChange={e => setNewCity(e.target.value)} 
+                        className="input-glass text-xs py-2 w-full" 
+                        required 
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label htmlFor="state-select" className="sr-only">Select State</label>
+                      <select 
+                        id="state-select"
+                        value={newState} 
+                        onChange={e => setNewState(e.target.value)} 
+                        className="select-glass text-xs py-2 w-full" 
+                        required
+                      >
+                        <option value="">Select State</option>
+                        {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
                     <button type="submit" className="btn-primary w-full text-[10px] py-2 flex items-center justify-center gap-1">
-                      <FiCheck className="w-3 h-3" /> Update Location
+                      <FiCheck className="w-3 h-3" aria-hidden="true" /> Update Location
                     </button>
                   </form>
                 </motion.div>
@@ -186,10 +196,11 @@ export default function Dashboard() {
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setChatOpen(true)}
+            aria-label="Open AI Assistant"
             className="relative w-14 h-14 rounded-full bg-gradient-to-br from-saffron to-orange-500 shadow-xl flex items-center justify-center shadow-saffron/40 cursor-pointer border-2 border-white"
             id="chatbot-fab"
           >
-            <FiMessageCircle className="w-6 h-6 text-white" />
+            <FiMessageCircle className="w-6 h-6 text-white" aria-hidden="true" />
           </motion.button>
         </div>
       </motion.div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from '../context/LocationContext';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiUser, FiInfo, FiX, FiAward, FiMapPin, FiAnchor, FiBriefcase, FiExternalLink } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,7 +28,7 @@ export default function MyLeaders() {
       setLoading(true);
       try {
         const params = coords?.lat ? `lat=${coords.lat}&lng=${coords.lng}` : `state=${locationData?.state}&city=${locationData?.city}`;
-        const res = await axios.get(`/api/leaders?${params}`);
+        const res = await api.get(`/leaders?${params}`);
         setData(res.data);
       } catch (err) {
         console.error('Leaders fetch failed:', err);
@@ -44,7 +44,7 @@ export default function MyLeaders() {
     setLeaderImage(leader.image || null);
     setInfoLoading(true);
     try {
-      const res = await axios.get(`/api/leaders/info`, {
+      const res = await api.get(`/leaders/info`, {
         params: {
           name: leader.name,
           role: leader.role,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from '../context/LocationContext';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiActivity, FiSend, FiThumbsUp, FiClock, FiMapPin, FiCamera, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -35,7 +35,7 @@ export default function BoothReporter() {
     setLoading(true);
     try {
       const params = coords?.lat ? `lat=${coords.lat}&lng=${coords.lng}&radius=1.0` : '';
-      const res = await axios.get(`/api/booth-status?${params}`);
+      const res = await api.get(`/booth-status?${params}`);
       setReports(res.data.reports || []);
       setSummary(res.data.summary || null);
     } catch (err) {
@@ -75,7 +75,7 @@ export default function BoothReporter() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('/api/booth-status', {
+      await api.post('/booth-status', {
         ...form,
         location: { lat: coords?.lat || 0, lng: coords?.lng || 0 },
         city: locationData?.city,
@@ -96,7 +96,7 @@ export default function BoothReporter() {
 
   const handleUpvote = async (id) => {
     try {
-      await axios.patch(`/api/booth-status/${id}/upvote`);
+      await api.patch(`/booth-status/${id}/upvote`);
       setReports(prev => prev.map(r => r._id === id ? { ...r, upvotes: (r.upvotes || 0) + 1 } : r));
     } catch (err) {
       console.error('Upvote failed:', err);
@@ -127,11 +127,25 @@ export default function BoothReporter() {
             <p className="text-[10px] text-text-muted">Crowdsourced Verification</p>
           </div>
         </div>
-        <div className="flex p-1 bg-slate-100 rounded-lg">
-          <button onClick={() => setTab('view')} className={`text-[10px] px-4 py-1.5 rounded-md font-bold transition-all cursor-pointer ${tab === 'view' ? 'bg-white text-india-green-light shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}>
+        <div className="flex p-1 bg-slate-100 rounded-lg" role="tablist" aria-label="Booth Status Options">
+          <button 
+            role="tab"
+            aria-selected={tab === 'view'}
+            aria-controls="panel-explore"
+            id="tab-explore"
+            onClick={() => setTab('view')} 
+            className={`text-[10px] px-4 py-1.5 rounded-md font-bold transition-all cursor-pointer ${tab === 'view' ? 'bg-white text-india-green-light shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}
+          >
             EXPLORE
           </button>
-          <button onClick={() => setTab('report')} className={`text-[10px] px-4 py-1.5 rounded-md font-bold transition-all cursor-pointer ${tab === 'report' ? 'bg-saffron text-white shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}>
+          <button 
+            role="tab"
+            aria-selected={tab === 'report'}
+            aria-controls="panel-report"
+            id="tab-report"
+            onClick={() => setTab('report')} 
+            className={`text-[10px] px-4 py-1.5 rounded-md font-bold transition-all cursor-pointer ${tab === 'report' ? 'bg-saffron text-white shadow-sm' : 'text-text-muted hover:text-text-secondary'}`}
+          >
             REPORT
           </button>
         </div>
@@ -156,6 +170,9 @@ export default function BoothReporter() {
           ) : tab === 'view' ? (
             <motion.div 
               key="view"
+              role="tabpanel"
+              id="panel-explore"
+              aria-labelledby="tab-explore"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
@@ -256,6 +273,9 @@ export default function BoothReporter() {
           ) : (
             <motion.form 
               key="report"
+              role="tabpanel"
+              id="panel-report"
+              aria-labelledby="tab-report"
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
@@ -270,9 +290,10 @@ export default function BoothReporter() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Booth Identification</label>
+                <label htmlFor="booth-select" className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Booth Identification</label>
                 {nearbyBooths.length > 0 ? (
                   <select 
+                    id="booth-select"
                     value={form.boothId} 
                     onChange={e => setForm({...form, boothId: e.target.value})} 
                     className="select-glass" 
@@ -294,16 +315,16 @@ export default function BoothReporter() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">EVM Status</label>
-                  <select value={form.evmStatus} onChange={e => setForm({...form, evmStatus: e.target.value})} className="select-glass">
+                  <label htmlFor="evm-status" className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">EVM Status</label>
+                  <select id="evm-status" value={form.evmStatus} onChange={e => setForm({...form, evmStatus: e.target.value})} className="select-glass">
                     <option value="working">✅ Working Smoothly</option>
                     <option value="glitch">⚠️ Minor Glitches</option>
                     <option value="down">❌ Completely Down</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Queue Density</label>
-                  <select value={form.queueLength} onChange={e => setForm({...form, queueLength: e.target.value})} className="select-glass">
+                  <label htmlFor="queue-density" className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Queue Density</label>
+                  <select id="queue-density" value={form.queueLength} onChange={e => setForm({...form, queueLength: e.target.value})} className="select-glass">
                     <option value="empty">Empty</option>
                     <option value="short">Short (Fast)</option>
                     <option value="moderate">Moderate</option>
@@ -314,17 +335,18 @@ export default function BoothReporter() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Safety & Security</label>
-                <select value={form.safetyStatus} onChange={e => setForm({...form, safetyStatus: e.target.value})} className="select-glass">
-                  <option value="peaceful">🟢 Peaceful Environment</option>
-                  <option value="tense">🟡 Tense / Arguments</option>
-                  <option value="disrupted">🔴 Disrupted / Policed</option>
+                <label htmlFor="safety-status" className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Safety & Security</label>
+                <select id="safety-status" value={form.safetyStatus} onChange={e => setForm({...form, safetyStatus: e.target.value})} className="select-glass">
+                  <option value="peaceful">Peaceful Environment</option>
+                  <option value="tense">Tense / Arguments</option>
+                  <option value="disrupted">Disrupted / Policed</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Observations</label>
+                <label htmlFor="observations" className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Observations</label>
                 <textarea 
+                  id="observations"
                   placeholder="Mention anything unusual or helpful for other voters..." 
                   value={form.description} 
                   onChange={e => setForm({...form, description: e.target.value})} 

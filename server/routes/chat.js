@@ -1,6 +1,8 @@
 const express = require('express');
 const router = require('express').Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { z } = require('zod');
+const rateLimit = require('express-rate-limit');
 
 const SYSTEM_INSTRUCTION = `You are VoterPath AI, a neutral, non-partisan Indian election guide assistant. Your role is to help Indian citizens navigate the voting process with accurate, up-to-date information.
 
@@ -9,6 +11,19 @@ IMPORTANT RULES:
 - NEVER recommend candidates.
 - Cite ECI (eci.gov.in) as the authority.
 - Be concise and factual.`;
+const chatLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // Limit each IP to 20 chat requests per hour
+  message: { error: 'Chat limit reached. Please try again in an hour.' }
+});
+
+const ChatSchema = z.object({
+  message: z.string().min(1).max(1000),
+  history: z.array(z.object({
+    role: z.enum(['user', 'model', 'assistant']),
+    text: z.string()
+  })).optional()
+});
 
 async function getAIResponse(apiKey, modelId, message, history, systemInstruction) {
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -17,7 +32,7 @@ async function getAIResponse(apiKey, modelId, message, history, systemInstructio
     systemInstruction: systemInstruction
   });
 
-  let chatHistory = history.map(h => ({
+  let chatHistory = (history || []).map(h => ({
     role: h.role === 'user' ? 'user' : 'model',
     parts: [{ text: h.text }]
   }));
@@ -35,9 +50,16 @@ async function getAIResponse(apiKey, modelId, message, history, systemInstructio
   return response.text();
 }
 
-router.post('/', async (req, res) => {
-  const { message, history = [] } = req.body;
-  if (!message) return res.status(400).json({ error: 'Message is required' });
+router.post('/', chatLimiter, async (req, res) => {
+  const validation = ChatSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ 
+      error: 'Invalid request data', 
+      details: validation.error.format() 
+    });
+  }
+
+  const { message, history = [] } = validation.data;
 
   // Custom model fallback sequence requested by user
   const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3-flash"];

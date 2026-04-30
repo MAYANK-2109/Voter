@@ -3,6 +3,7 @@ import { LocationProvider, useLocation } from './context/LocationContext'
 import Dashboard from './components/Dashboard'
 import Landing from './components/Landing'
 import LocationError from './components/LocationError'
+import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
 
 function AppContent() {
@@ -45,9 +46,11 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <LocationProvider>
-        <AppContent />
-      </LocationProvider>
+      <ErrorBoundary>
+        <LocationProvider>
+          <AppContent />
+        </LocationProvider>
+      </ErrorBoundary>
     </Router>
   );
 }

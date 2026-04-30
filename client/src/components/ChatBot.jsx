@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { FiX, FiSend, FiMessageCircle, FiZap } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 
@@ -60,7 +60,7 @@ export default function ChatBot({ onClose }) {
 
     try {
       const history = messages.map(m => ({ role: m.role, text: m.text }));
-      const res = await axios.post('/api/chat', { message: text.trim(), history });
+      const res = await api.post('/chat', { message: text.trim(), history });
       setMessages(prev => [...prev, { role: 'model', text: res.data.reply, isTyping: true }]);
     } catch (err) {
       const errMsg = err.response?.data?.error || 'Failed to get response. Please try again.';
@@ -97,12 +97,20 @@ export default function ChatBot({ onClose }) {
             <p className="text-[10px] text-text-muted">Active Hub ● India</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 rounded-lg hover:bg-component-hover cursor-pointer transition-colors">
-          <FiX className="w-5 h-5 text-text-muted" />
+        <button 
+          onClick={onClose} 
+          aria-label="Close Chat"
+          className="p-2 rounded-lg hover:bg-component-hover cursor-pointer transition-colors"
+        >
+          <FiX className="w-5 h-5 text-text-muted" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+      <div 
+        className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
@@ -167,15 +175,17 @@ export default function ChatBot({ onClose }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder="Type your question..."
+              aria-label="Message VOTE-पथ AI"
               className="input-glass flex-1 text-xs"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
+              aria-label="Send message"
               className="btn-primary px-4 disabled:opacity-30 disabled:grayscale"
             >
-              <FiSend className="w-4 h-4" />
+              <FiSend className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </form>

@@ -10,4 +10,8 @@ const boothInsightSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now }
 });
 
+// Performance Indexes
+boothInsightSchema.index({ boothId: 1 });
+boothInsightSchema.index({ lastUpdated: -1 });
+
 module.exports = mongoose.model('BoothInsight', boothInsightSchema);
