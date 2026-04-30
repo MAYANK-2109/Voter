@@ -50,10 +50,10 @@ export default function PulseNews() {
             <h2 className="text-sm font-bold text-text-primary">Live Election Pulse</h2>
             <div className="flex items-center gap-2">
               <p className="text-[10px] text-text-muted">
-                {isFallback ? 'National News' : (locationData?.state || 'National News')}
+                {isFallback ? 'Other State Elections' : (locationData?.state || 'Other State Elections')}
               </p>
               {isFallback && locationData?.state && (
-                <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-text-muted font-semibold uppercase tracking-wider">State Unavailable</span>
+                <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-text-muted font-semibold uppercase tracking-wider">State Not Polling</span>
               )}
             </div>
           </div>

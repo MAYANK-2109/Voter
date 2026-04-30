@@ -3,41 +3,41 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShield, FiRadio, FiUser, FiActivity, FiThermometer, FiMessageCircle } from 'react-icons/fi';
 
 const PILLARS = [
-  { 
-    title: 'Pulse News', 
-    desc: 'Real-time election updates tailored to your specific constituency.', 
-    icon: FiRadio, 
-    color: 'bg-saffron/10 text-saffron' 
+  {
+    title: 'Pulse News',
+    desc: 'Real-time election updates tailored to your specific constituency.',
+    icon: FiRadio,
+    color: 'bg-saffron/10 text-saffron'
   },
-  { 
-    title: 'Booth Pulse', 
-    desc: 'Crowdsourced reports on EVM status and queue lengths.', 
-    icon: FiActivity, 
-    color: 'bg-india-green/10 text-india-green' 
+  {
+    title: 'Booth Pulse',
+    desc: 'Crowdsourced reports on EVM status and queue lengths.',
+    icon: FiActivity,
+    color: 'bg-india-green/10 text-india-green'
   },
-  { 
-    title: 'Climate Watch', 
-    desc: 'Heatwave alerts and AI-powered safe voting window recommendations.', 
-    icon: FiThermometer, 
-    color: 'bg-red-500/10 text-red-500' 
+  {
+    title: 'Climate Watch',
+    desc: 'Heatwave alerts and AI-powered safe voting window recommendations.',
+    icon: FiThermometer,
+    color: 'bg-red-500/10 text-red-500'
   },
-  { 
-    title: 'AI Bot', 
-    desc: 'Instant answers to all your voting and documentation queries.', 
-    icon: FiMessageCircle, 
-    color: 'bg-indigo-500/10 text-indigo-500' 
+  {
+    title: 'AI Bot',
+    desc: 'Instant answers to all your voting and documentation queries.',
+    icon: FiMessageCircle,
+    color: 'bg-indigo-500/10 text-indigo-500'
   },
-  { 
-    title: 'Leaders', 
-    desc: 'Comprehensive profiles and bios of your local elected representatives.', 
-    icon: FiUser, 
-    color: 'bg-india-blue/10 text-india-blue' 
+  {
+    title: 'Leaders',
+    desc: 'Comprehensive profiles and bios of your local elected representatives.',
+    icon: FiUser,
+    color: 'bg-india-blue/10 text-india-blue'
   },
-  { 
-    title: 'Safety SOS', 
-    desc: 'Advanced check-in system and emergency alerts for trusted contacts.', 
-    icon: FiShield, 
-    color: 'bg-orange-600/10 text-orange-600' 
+  {
+    title: 'Safety SOS',
+    desc: 'Advanced check-in system and emergency alerts for trusted contacts.',
+    icon: FiShield,
+    color: 'bg-orange-600/10 text-orange-600'
   }
 ];
 
@@ -45,7 +45,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white overflow-hidden selection:bg-saffron/20">
       <div className="tricolor-stripe" />
-      
+
       {/* Navbar */}
       <nav className="fixed top-1 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -73,7 +73,7 @@ export default function Landing() {
       <section className="pt-32 pb-20 px-6 relative">
         <div className="absolute inset-0 mandala-pattern -z-10 opacity-[0.02]" />
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -86,7 +86,7 @@ export default function Landing() {
               <span className="text-india-green font-bold text-[10px] tracking-widest uppercase">Digital India</span>
             </div>
             <h1 className="text-5xl lg:text-7xl font-black text-text-primary leading-[1.1] mb-6">
-              Empowering India's <br/> <span className="heading-gradient">Democratic Pulse.</span>
+              Empowering India's <br /> <span className="heading-gradient">Democratic Pulse.</span>
             </h1>
             <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-xl">
               VOTE-पथ 2.0 is a next-generation civic resilience portal, designed to empower every Indian citizen with real-time data, safety tools, and AI-driven insights.
@@ -101,7 +101,7 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -109,9 +109,9 @@ export default function Landing() {
           >
             <div className="absolute inset-0 bg-saffron/10 rounded-[2rem] blur-3xl -z-10" />
             <div className="p-2 bg-gradient-to-br from-saffron/20 via-white to-india-green/20 rounded-[2.2rem] shadow-2xl">
-              <img 
-                src="/voterpath_hero_banner_1777555965071.png" 
-                alt="VOTE-पथ Dashboard" 
+              <img
+                src="banner.jpg"
+                alt="VOTE-पथ Dashboard"
                 className="rounded-[2rem] border border-white"
               />
             </div>
@@ -130,7 +130,7 @@ export default function Landing() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {PILLARS.map((p, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 whileHover={{ y: -10 }}
                 className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all"
@@ -161,10 +161,10 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-12 border-t border-slate-100 text-center bg-white relative">
         <div className="flex items-center justify-center gap-2 mb-4">
-           <div className="w-6 h-6 rounded bg-white border border-slate-200 flex flex-col overflow-hidden shadow-xs">
-              <div className="flex-1 bg-saffron" />
-              <div className="flex-1 bg-india-green" />
-            </div>
+          <div className="w-6 h-6 rounded bg-white border border-slate-200 flex flex-col overflow-hidden shadow-xs">
+            <div className="flex-1 bg-saffron" />
+            <div className="flex-1 bg-india-green" />
+          </div>
           <span className="font-bold text-text-primary">VOTE-पथ 2.0</span>
         </div>
         <p className="text-xs text-text-muted mb-2">© 2024 VOTE-पथ Resilience Project. Built with ❤️ for India.</p>
