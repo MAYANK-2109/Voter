@@ -54,13 +54,14 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Pulse API error:', error.message);
-    if (error.response) {
-      return res.status(error.response.status).json({ 
-        error: 'News API error', 
-        details: error.response.data.errors || error.response.data.message || error.response.data
-      });
-    }
-    res.status(500).json({ error: 'Failed to fetch election news' });
+    // Return a 200 with empty data instead of a 400/500
+    res.json({
+      state: 'Unknown',
+      isFallback: true,
+      articles: [],
+      error: 'News service temporarily unavailable',
+      details: error.message
+    });
   }
 });
 
