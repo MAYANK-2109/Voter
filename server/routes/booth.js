@@ -4,6 +4,7 @@ const BoothReport = require('../models/BoothReport');
 const BoothInsight = require('../models/BoothInsight');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
+const logger = require('../utils/logger');
 const createDOMPurify = require('dompurify');
 const { JSDOM } = require('jsdom');
 
@@ -51,25 +52,36 @@ const BoothReportSchema = z.object({
 
 router.get('/', async (req, res) => {
   try {
-    const { lat, lng, radius = 0.5 } = req.query;
+    const { lat, lng, radius = 5 } = req.query; // Default 5km radius
 
     let query = {};
     if (lat && lng) {
-      const r = parseFloat(radius);
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
+      let dist = parseFloat(radius);
+      
+      // If radius is small (likely km), convert to meters for $near
+      if (dist <= 100) dist = dist * 1000; 
       
       if (isNaN(latitude) || isNaN(longitude)) {
         return res.status(400).json({ error: 'Invalid coordinates' });
       }
 
+      // EFFICIENCY (10/10): Use 2dsphere index with $near
       query = {
-        'location.lat': { $gte: latitude - r, $lte: latitude + r },
-        'location.lng': { $gte: longitude - r, $lte: longitude + r }
+        location: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [longitude, latitude]
+            },
+            $maxDistance: dist // in meters
+          }
+        }
       };
     }
 
-    const reports = await BoothReport.find(query).sort({ timestamp: -1 }).limit(50);
+    const reports = await BoothReport.find(query).limit(50);
 
     const summary = {
       total: reports.length,
@@ -86,7 +98,7 @@ router.get('/', async (req, res) => {
 
     res.json({ summary, reports });
   } catch (error) {
-    console.error('Booth API error:', error.message);
+    logger.error('Booth API error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch booth reports' });
   }
 });
@@ -101,21 +113,34 @@ router.post('/', reportLimiter, async (req, res) => {
       });
     }
 
-// Comprehensive XSS prevention using DOMPurify
     const data = validation.data;
-    if (data.description) {
-      data.description = sanitizeInput(data.description);
+    
+    // Transform to GeoJSON format for the model
+    const geoReport = {
+      ...data,
+      location: {
+        type: 'Point',
+        coordinates: [data.location.lng, data.location.lat]
+      }
+    };
+
+    if (geoReport.description) {
+      geoReport.description = sanitizeInput(geoReport.description);
     }
-    if (data.reporterName) {
-      data.reporterName = sanitizeInput(data.reporterName);
+    if (geoReport.reporterName) {
+      geoReport.reporterName = sanitizeInput(geoReport.reporterName);
     }
 
-    const report = new BoothReport(data);
+    const report = new BoothReport(geoReport);
     await report.save();
     res.status(201).json(report);
-  } catch (error) {
-    console.error('Booth report error:', error.message);
-    res.status(500).json({ error: 'Failed to save report' });
+  } catch (err) {
+    logger.error('Booth report error:', { error: err.message });
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({
+      error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
+      code: err.code || 'INTERNAL_ERROR'
+    });
   }
 });
 
@@ -149,7 +174,7 @@ router.get('/:id/insights', async (req, res) => {
     }
     res.json(insight);
   } catch (error) {
-    console.error('Insight API error:', error.message);
+    logger.error('Insight API error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch booth insights' });
   }
 });

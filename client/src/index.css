@@ -3,19 +3,20 @@
 @theme {
   --color-saffron: #FF9933;
   --color-saffron-light: #FFB366;
+  --color-saffron-dark: #C2410C; /* Darker saffron for WCAG AA compliance on white */
   --color-india-green: #138808;
-  --color-india-green-light: #2EAB1F;
+  --color-india-green-light: #166534;
   --color-india-blue: #000080;
   
   --color-background: #F8FAFC;
   --color-card: #FFFFFF;
   --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94A3B8;
+  --color-text-secondary: #334155;
+  --color-text-muted: #475569; /* Darkened from #64748B for better contrast */
   
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
   
   --color-component-subtle: #F1F5F9;
   --color-component-hover: #E2E8F0;
@@ -42,7 +43,7 @@ body {
 
 /* Typography Utilities */
 .heading-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-saffron via-india-blue to-india-green;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-saffron-dark via-india-blue to-india-green;
 }
 
 /* Component Tokens */
@@ -112,12 +113,6 @@ body {
 .skeleton::after {
   content: "";
   @apply absolute inset-0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.8),
-    transparent
-  );
   animation: shimmer 1.8s infinite;
 }
 

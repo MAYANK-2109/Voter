@@ -101,7 +101,7 @@ router.get('/info', async (req, res) => {
 
   const prompt = `Provide a concise, factual, non-partisan biography of about 70 words for ${name}, who is the ${role} of ${city ? city + ', ' : ''}${state}, India. Focus on their political career, key roles, and major contributions. Maintain a neutral tone.`;
 
-  const models = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3-flash"];
+  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
   let lastError = null;
   let infoText = '';
   let modelUsed = '';

@@ -3,8 +3,15 @@ const mongoose = require('mongoose');
 const boothReportSchema = new mongoose.Schema({
   boothId: { type: String, required: true },
   location: {
-    lat: { type: Number, required: true },
-    lng: { type: Number, required: true }
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [lng, lat]
+      required: true
+    }
   },
   city: String,
   state: String,
@@ -19,6 +26,7 @@ const boothReportSchema = new mongoose.Schema({
 });
 
 // Performance Indexes
+boothReportSchema.index({ location: '2dsphere' });
 boothReportSchema.index({ boothId: 1 });
 boothReportSchema.index({ state: 1, city: 1 });
 boothReportSchema.index({ timestamp: -1 });

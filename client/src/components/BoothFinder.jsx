@@ -133,6 +133,9 @@ useEffect(() => {
           zoom={15} 
           style={{ height: '100%', width: '100%', zIndex: 1 }}
           zoomControl={false}
+          keyboard={true}
+          role="application"
+          aria-label="Interactive map showing polling stations nearby"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -146,8 +149,11 @@ useEffect(() => {
               key={booth.id} 
               position={[booth.lat, booth.lng]} 
               icon={customMarker}
+              keyboard={true}
+              alt={`Booth: ${booth.name}`}
               eventHandlers={{
-                click: () => setSelectedBooth(booth)
+                click: () => setSelectedBooth(booth),
+                keypress: (e) => { if (e.originalEvent.key === 'Enter') setSelectedBooth(booth); }
               }}
             >
               <Popup>
@@ -155,7 +161,7 @@ useEffect(() => {
                   <p className="text-xs font-bold">{booth.name}</p>
                   <button 
                     onClick={() => openInGoogleMaps(booth.lat, booth.lng)}
-                    className="mt-2 text-[10px] text-india-blue font-bold flex items-center gap-1"
+                    className="mt-2 text-[10px] text-india-blue font-bold flex items-center gap-1 focus:ring-2 focus:ring-india-blue outline-none rounded"
                   >
                     Navigate <FiNavigation className="w-3 h-3" />
                   </button>

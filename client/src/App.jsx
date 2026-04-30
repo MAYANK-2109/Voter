@@ -21,7 +21,13 @@ function AppContent() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-text-primary mb-2">Locating You...</h2>
-            <p className="text-text-secondary text-sm">VOTE-पथ needs your location to personalize your experience</p>
+            <p className="text-text-secondary text-sm mb-6">VOTE-पथ needs your location to personalize your experience</p>
+            <button 
+              onClick={() => setManualLocation('Raipur', 'Chhattisgarh')}
+              className="text-xs font-bold text-india-blue hover:underline cursor-pointer"
+            >
+              Skip and use default location (Raipur)
+            </button>
           </div>
         </div>
       );
