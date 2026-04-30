@@ -4,30 +4,31 @@ const axios = require('axios');
 const { z } = require('zod');
 const NodeCache = require('node-cache');
 
-/**
- * -------------------------------------------------------------------------
- * LENS 1: FORMAL VERIFICATION & DETERMINISTIC LOGIC
- * Transformation: From Branching Logic to a Immutable Decision Matrix
- * -------------------------------------------------------------------------
- */
-const CLIMATE_THRESHOLDS = [
+// --- Configuration & Constants ---
+const CACHE_TTL = 900; // 15 Minutes
+const API_TIMEOUT = 4000;
+const weatherCache = new NodeCache({ stdTTL: CACHE_TTL });
+
+// --- Safety Thresholds (Decision Matrix) ---
+// This table maps feels-like temperatures to safety status and alerts.
+const SAFETY_RULES = [
   {
-    minFeelsLike: 45,
-    status: 'extreme',
+    minTemp: 45,
+    status: 'Extreme',
     isHeatwave: true,
     alerts: [
-      '🔴 EXTREME HEAT WARNING: Avoid outdoor exposure. Vote only during early morning.',
-      '💧 Carry at least 1 litre of water. Seek shade immediately if feeling dizzy.'
+      '🔴 EXTREME HEAT WARNING: Vote only during early morning.',
+      '💧 Carry 1L+ water. Seek shade if feeling dizzy.'
     ],
-    windows: [{ time: '6:00 AM - 8:00 AM', safety: 'caution', label: 'Early Morning (Best Option)' }]
+    windows: [{ time: '6:00 AM - 8:00 AM', safety: 'caution', label: 'Early Morning' }]
   },
   {
-    minFeelsLike: 40,
-    status: 'severe',
+    minTemp: 40,
+    status: 'Severe',
     isHeatwave: true,
     alerts: [
-      '🟠 SEVERE HEAT ALERT: Heatwave conditions detected.',
-      '💧 Stay hydrated. Carry water and ORS. Wear light cotton clothes.'
+      '🟠 SEVERE HEAT ALERT: Heatwave detected.',
+      '💧 Stay hydrated. Use ORS. Wear cotton.'
     ],
     windows: [
       { time: '6:00 AM - 9:00 AM', safety: 'safe', label: 'Morning Window' },
@@ -35,8 +36,8 @@ const CLIMATE_THRESHOLDS = [
     ]
   },
   {
-    minFeelsLike: 35,
-    status: 'caution',
+    minTemp: 35,
+    status: 'Caution',
     isHeatwave: false,
     alerts: [
       '🟡 HEAT CAUTION: Temperatures are elevated.',
@@ -48,8 +49,8 @@ const CLIMATE_THRESHOLDS = [
     ]
   },
   {
-    minFeelsLike: -Infinity, // Catch-all deterministic baseline
-    status: 'optimal',
+    minTemp: -Infinity, // Default baseline
+    status: 'Optimal',
     isHeatwave: false,
     alerts: [],
     windows: [
@@ -60,119 +61,106 @@ const CLIMATE_THRESHOLDS = [
   }
 ];
 
-const HUMIDITY_THRESHOLD = 80;
-const HUMIDITY_ALERT = '💦 High humidity detected. Heat stress risk is elevated even at lower temperatures.';
+const HUMIDITY_ALERT = '💦 High humidity: Heat stress risk is higher than it feels.';
 
-/**
- * -------------------------------------------------------------------------
- * LENS 2: COGNITIVE LOAD & IDIOMATIC DX
- * Transformation: Abstracting Infrastructure as Stateless Services
- * -------------------------------------------------------------------------
- */
-
-// Pillar: Cloud-Native (Stateless Interface)
-const weatherCache = new NodeCache({ stdTTL: 900 });
-
-// Pillar: Security & Formal Type-Safety
+// --- Validation Schemas ---
 const CoordsSchema = z.object({
   lat: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-90).max(90)),
   lng: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-180).max(180))
 });
 
-class WeatherServiceError extends Error {
-  constructor(message, statusCode = 500, code = 'WEATHER_INTERNAL_ERROR') {
-    super(message);
-    this.name = 'WeatherServiceError';
-    this.statusCode = statusCode;
-    this.code = code;
-  }
-}
-
-class WeatherEngine {
+/**
+ * WeatherService
+ * Handles all logic for fetching and processing weather-based voting safety.
+ */
+class WeatherService {
   /**
-   * solve
-   * Formal verification: Replaces O(N) nested branches with O(1) decision matrix lookup.
-   * Ensures 100% deterministic mapping of environment to safety state.
+   * Process the raw weather data into voter-friendly insights.
    */
-  static solve(feelsLike, humidity) {
-    const profile = CLIMATE_THRESHOLDS.find(t => feelsLike >= t.minFeelsLike);
+  static getSafetyInsights(feelsLike, humidity) {
+    // Find the first rule that matches the current temperature
+    const rule = SAFETY_RULES.find(r => feelsLike >= r.minTemp);
     
-    // Pillar: Resilience (Logic Isolation)
-    const activeAlerts = [...profile.alerts];
-    if (humidity > HUMIDITY_THRESHOLD) activeAlerts.push(HUMIDITY_ALERT);
+    const alerts = [...rule.alerts];
+    if (humidity > 80) alerts.push(HUMIDITY_ALERT);
 
-    return { 
-      windows: profile.windows, 
-      alerts: activeAlerts, 
-      isHeatwave: profile.isHeatwave,
-      riskLevel: profile.status
+    return {
+      status: rule.status,
+      isHeatwave: rule.isHeatwave,
+      alerts,
+      windows: rule.windows
     };
   }
 
   /**
-   * fetch
-   * Pillar: Cloud-Native Isolation
-   * Encapsulates side effects and provides idempotent weather fetching.
+   * Fetch weather from API or Cache.
    */
-  static async fetch(lat, lng) {
-    const roundedLat = lat.toFixed(2);
-    const roundedLng = lng.toFixed(2);
-    const cacheKey = `weather_${roundedLat}_${roundedLng}`;
+  static async fetchWeather(lat, lng) {
+    const cacheKey = `weather_${lat.toFixed(2)}_${lng.toFixed(2)}`;
     
+    // 1. Check Cache
     const cached = weatherCache.get(cacheKey);
-    if (cached) return { ...cached, _meta: { cached: true, lat: roundedLat, lng: roundedLng } };
+    if (cached) return { ...cached, isFromCache: true };
 
+    // 2. Fetch Fresh Data
     if (!process.env.OPENWEATHER_API_KEY) {
-      throw new WeatherServiceError('Upstream Auth Missing', 401, 'CONFIG_FAULT');
+      throw new Error('WEATHER_API_KEY_MISSING');
     }
 
     try {
       const { data } = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
         params: { lat, lon: lng, units: 'metric', appid: process.env.OPENWEATHER_API_KEY },
-        timeout: 4000
+        timeout: API_TIMEOUT
       });
 
-      const { windows, alerts, isHeatwave, riskLevel } = this.solve(data.main.feels_like, data.main.humidity);
+      const insights = this.getSafetyInsights(data.main.feels_like, data.main.humidity);
 
-      const payload = {
+      const result = {
+        city: data.name,
         temperature: Math.round(data.main.temp),
         feelsLike: Math.round(data.main.feels_like),
         humidity: data.main.humidity,
         condition: data.weather[0]?.main || 'Clear',
-        description: data.weather[0]?.description || '',
-        windSpeed: data.wind?.speed || 0,
-        city: data.name,
-        isHeatwave,
-        riskLevel,
-        safeWindows: windows,
-        alerts,
-        timestamp: new Date().toISOString()
+        description: data.weather[0]?.description,
+        windSpeed: data.wind?.speed,
+        ...insights,
+        updatedAt: new Date().toISOString()
       };
 
-      weatherCache.set(cacheKey, payload);
-      return { ...payload, _meta: { cached: false, lat: roundedLat, lng: roundedLng } };
-    } catch (e) {
-      console.error(`[DevSecOps] Weather Fetch Fault | Trace: ${e.message}`);
-      throw new WeatherServiceError('Upstream service degradation', e.response?.status || 502, 'UPSTREAM_FAULT');
+      // 3. Update Cache
+      weatherCache.set(cacheKey, result);
+      return { ...result, isFromCache: false };
+
+    } catch (error) {
+      console.error('[Weather] API Error:', error.message);
+      throw error;
     }
   }
 }
 
-/**
- * -------------------------------------------------------------------------
- * LENS 3: CLOUD-NATIVE ROUTING
- * Implementation of environment-agnostic execution and error propagation.
- * -------------------------------------------------------------------------
- */
+// --- API Routes ---
+
 router.get('/', async (req, res, next) => {
   try {
-    const validation = CoordsSchema.safeParse(req.query);
-    if (!validation.success) throw new WeatherServiceError('Type Safety Violation', 400, 'PARAM_FAULT');
+    // Validate Input
+    const query = CoordsSchema.safeParse(req.query);
+    if (!query.success) {
+      return res.status(400).json({ error: 'Invalid coordinates provided.' });
+    }
 
-    const result = await WeatherEngine.fetch(validation.data.lat, validation.data.lng);
-    res.json(result);
-  } catch (err) {
-    next(err); // Hand-off to centralized resilience middleware
+    const { lat, lng } = query.data;
+    const weather = await WeatherService.fetchWeather(lat, lng);
+    
+    res.json(weather);
+
+  } catch (error) {
+    // Graceful error handling
+    const status = error.response?.status || 500;
+    const message = error.message === 'WEATHER_API_KEY_MISSING' 
+      ? 'Weather service is currently unconfigured.' 
+      : 'Failed to fetch local weather pulse.';
+    
+    res.status(status).json({ error: message });
   }
 });
 
