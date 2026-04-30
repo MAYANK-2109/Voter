@@ -20,6 +20,7 @@ export default function BoothReporter() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [nearbyBooths, setNearbyBooths] = useState([]);
   
   const [form, setForm] = useState({
     boothId: '',
@@ -49,6 +50,27 @@ export default function BoothReporter() {
     return () => clearInterval(interval);
   }, [coords]);
 
+  useEffect(() => {
+    if (!coords?.lat) {
+      setNearbyBooths([]);
+      return;
+    }
+    
+    // Simulate nearby booths based on user location (same logic as BoothFinder)
+    const simulatedBooths = [
+      { id: 1, name: 'Government Primary School, East Wing', lat: coords.lat + 0.002, lng: coords.lng + 0.001, address: 'Sector 4, Near Community Center' },
+      { id: 2, name: 'Community Hall, Block B', lat: coords.lat - 0.003, lng: coords.lng - 0.002, address: 'MG Road, Opposite Police Station' },
+      { id: 3, name: 'St. Xaviers High School, Auditorium', lat: coords.lat + 0.001, lng: coords.lng - 0.004, address: 'Station Road, North Raipur' }
+    ];
+    setNearbyBooths(simulatedBooths);
+    
+    // Auto-select the first booth if form.boothId is empty
+    setForm(prev => ({ 
+      ...prev, 
+      boothId: prev.boothId || (simulatedBooths.length > 0 ? simulatedBooths[0].id.toString() : '') 
+    }));
+  }, [coords]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -60,7 +82,7 @@ export default function BoothReporter() {
         state: locationData?.state
       });
       setShowSuccess(true);
-      setForm({ boothId: '', evmStatus: 'working', queueLength: 'moderate', safetyStatus: 'peaceful', reporterName: '', description: '' });
+      setForm({ boothId: nearbyBooths.length > 0 ? nearbyBooths[0].id.toString() : '', evmStatus: 'working', queueLength: 'moderate', safetyStatus: 'peaceful', reporterName: '', description: '' });
       setTimeout(() => { 
         setShowSuccess(false); 
         setTab('view'); 
@@ -249,7 +271,25 @@ export default function BoothReporter() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Booth Identification</label>
-                <input type="text" placeholder="Booth Number or Building Name" value={form.boothId} onChange={e => setForm({...form, boothId: e.target.value})} className="input-glass" required />
+                {nearbyBooths.length > 0 ? (
+                  <select 
+                    value={form.boothId} 
+                    onChange={e => setForm({...form, boothId: e.target.value})} 
+                    className="select-glass" 
+                    required
+                  >
+                    <option value="" disabled>Select Nearby Booth</option>
+                    {nearbyBooths.map(booth => (
+                      <option key={booth.id} value={booth.id.toString()}>
+                        {booth.name} (Booth #{booth.id})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="input-glass bg-slate-50 text-text-muted italic flex items-center h-[38px] text-xs">
+                    No booths found nearby. Please enable location.
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -295,7 +335,7 @@ export default function BoothReporter() {
 
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <button type="submit" disabled={submitting} className="btn-primary w-full py-4 text-xs font-black uppercase tracking-widest shadow-saffron/40">
+                  <button type="submit" disabled={submitting || nearbyBooths.length === 0} className={`btn-primary w-full py-4 text-xs font-black uppercase tracking-widest ${nearbyBooths.length === 0 ? 'opacity-50 cursor-not-allowed' : 'shadow-saffron/40'}`}>
                     <FiSend className="w-4 h-4" /> {submitting ? 'PROCESSING...' : 'TRANSMIT REPORT'}
                   </button>
                 </div>
