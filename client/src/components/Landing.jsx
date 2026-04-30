@@ -57,7 +57,7 @@ export default function Landing() {
               </div>
               <div className="flex-1 bg-india-green" />
             </div>
-            <span className="font-bold text-lg text-text-primary">VoterPath<span className="text-saffron">2.0</span></span>
+            <span className="font-bold text-lg text-text-primary">VOTE-पथ<span className="text-saffron">2.0</span></span>
           </div>
           <div className="hidden sm:flex items-center gap-8 mr-8">
             <a href="#pillars" className="text-xs font-bold text-text-muted hover:text-india-blue transition-colors uppercase tracking-wider">Features</a>
@@ -89,7 +89,7 @@ export default function Landing() {
               Empowering India's <br/> <span className="heading-gradient">Democratic Pulse.</span>
             </h1>
             <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-xl">
-              VoterPath 2.0 is a next-generation civic resilience portal, designed to empower every Indian citizen with real-time data, safety tools, and AI-driven insights.
+              VOTE-पथ 2.0 is a next-generation civic resilience portal, designed to empower every Indian citizen with real-time data, safety tools, and AI-driven insights.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/dashboard" className="btn-primary text-base py-4 px-8">
@@ -111,7 +111,7 @@ export default function Landing() {
             <div className="p-2 bg-gradient-to-br from-saffron/20 via-white to-india-green/20 rounded-[2.2rem] shadow-2xl">
               <img 
                 src="/voterpath_hero_banner_1777555965071.png" 
-                alt="VoterPath Dashboard" 
+                alt="VOTE-पथ Dashboard" 
                 className="rounded-[2rem] border border-white"
               />
             </div>
@@ -165,9 +165,9 @@ export default function Landing() {
               <div className="flex-1 bg-saffron" />
               <div className="flex-1 bg-india-green" />
             </div>
-          <span className="font-bold text-text-primary">VoterPath 2.0</span>
+          <span className="font-bold text-text-primary">VOTE-पथ 2.0</span>
         </div>
-        <p className="text-xs text-text-muted mb-2">© 2024 VoterPath Resilience Project. Built with ❤️ for India.</p>
+        <p className="text-xs text-text-muted mb-2">© 2024 VOTE-पथ Resilience Project. Built with ❤️ for India.</p>
         <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold">Satyamev Jayate</p>
       </footer>
     </div>

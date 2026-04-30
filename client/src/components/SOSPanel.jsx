@@ -33,7 +33,7 @@ export default function SOSPanel() {
     setCheckInTime(new Date().toISOString());
     setSosTriggered(false);
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('VoterPath Safety', { body: 'You are checked in at the polling station. We will alert contacts if no safe confirmation in 30 mins.' });
+      new Notification('VOTE-पथ Safety', { body: 'You are checked in at the polling station. We will alert contacts if no safe confirmation in 30 mins.' });
     } else if ('Notification' in window) {
       Notification.requestPermission();
     }
@@ -44,14 +44,14 @@ export default function SOSPanel() {
     setCheckInTime(null);
     setSosTriggered(false);
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('VoterPath Safety', { body: 'You have confirmed safe. Trusted contacts have been notified.' });
+      new Notification('VOTE-पथ Safety', { body: 'You have confirmed safe. Trusted contacts have been notified.' });
     }
   };
 
   const triggerSOS = () => {
     setSosTriggered(true);
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('🚨 VoterPath SOS ALERT', { body: `SOS triggered from ${locationData?.city || 'polling station'}. Trusted contacts are being alerted.` });
+      new Notification('🚨 VOTE-पथ SOS ALERT', { body: `SOS triggered from ${locationData?.city || 'polling station'}. Trusted contacts are being alerted.` });
     }
   };
 

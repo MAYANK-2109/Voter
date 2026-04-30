@@ -20,7 +20,7 @@ function AppContent() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-text-primary mb-2">Locating You...</h2>
-            <p className="text-text-secondary text-sm">VoterPath needs your location to personalize your experience</p>
+            <p className="text-text-secondary text-sm">VOTE-पथ needs your location to personalize your experience</p>
           </div>
         </div>
       );

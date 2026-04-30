@@ -35,7 +35,7 @@ function TypewriterText({ text, speed = 25, onComplete }) {
 
 export default function ChatBot({ onClose }) {
   const [messages, setMessages] = useState([
-    { role: 'model', text: 'Namaste! 🙏 I\'m VoterPath AI, your non-partisan election guide. I can help you with voter ID verification, polling procedures, your rights as a voter, and more.\n\nHow can I assist you today?', isTyping: false }
+    { role: 'model', text: 'Namaste! 🙏 I\'m VOTE-पथ AI, your non-partisan election guide. I can help you with voter ID verification, polling procedures, your rights as a voter, and more.\n\nHow can I assist you today?', isTyping: false }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ export default function ChatBot({ onClose }) {
             <FiMessageCircle className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-text-primary">VoterPath AI</h2>
+            <h2 className="text-sm font-bold text-text-primary">VOTE-पथ AI</h2>
             <p className="text-[10px] text-text-muted">Active Hub ● India</p>
           </div>
         </div>

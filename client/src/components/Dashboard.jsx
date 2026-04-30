@@ -70,7 +70,7 @@ export default function Dashboard() {
               <div className="flex-1 bg-india-green" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-text-primary leading-tight">VoterPath<span className="text-saffron">2.0</span></h1>
+              <h1 className="text-lg font-bold text-text-primary leading-tight">VOTE-पथ<span className="text-saffron">2.0</span></h1>
               <p className="text-[10px] text-text-muted font-medium tracking-wider uppercase flex items-center gap-1">
                 Election Resilience Engine <span className="text-india-blue">●</span> India
               </p>
@@ -167,17 +167,32 @@ export default function Dashboard() {
         </motion.div>
       </main>
 
-      <motion.button
+      <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setChatOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-saffron to-orange-500 shadow-lg flex items-center justify-center shadow-saffron/30 cursor-pointer"
-        id="chatbot-fab"
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
       >
-        <FiMessageCircle className="w-6 h-6 text-white" />
-      </motion.button>
+        <motion.div 
+          animate={{ y: [0, -8, 0] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="bg-white text-saffron text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg border border-saffron/20"
+        >
+          Ask VOTE-पथ AI 👋
+        </motion.div>
+        
+        <div className="relative group">
+          <div className="absolute inset-0 bg-saffron rounded-full animate-ping opacity-30 group-hover:opacity-0 transition-opacity duration-300"></div>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setChatOpen(true)}
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-saffron to-orange-500 shadow-xl flex items-center justify-center shadow-saffron/40 cursor-pointer border-2 border-white"
+            id="chatbot-fab"
+          >
+            <FiMessageCircle className="w-6 h-6 text-white" />
+          </motion.button>
+        </div>
+      </motion.div>
 
       <AnimatePresence>
         {chatOpen && (
@@ -206,7 +221,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 font-medium">
           <span>Made with ❤️ for Indian Democracy</span>
         </div>
-        <p>VoterPath 2.0 — Satyamev Jayate</p>
+        <p>VOTE-पथ 2.0 — Satyamev Jayate</p>
       </footer>
     </div>
   );
