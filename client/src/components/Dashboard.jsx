@@ -9,15 +9,7 @@ import MyLeaders from './MyLeaders';
 import SOSPanel from './SOSPanel';
 import ChatBot from './ChatBot';
 import BoothFinder from './BoothFinder';
-
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir',
-  'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab',
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-  'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
-];
+import { INDIAN_STATES } from '../utils/constants';
 
 const container = {
   hidden: { opacity: 0 },

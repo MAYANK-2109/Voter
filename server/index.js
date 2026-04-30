@@ -47,15 +47,22 @@ app.get('/', (req, res) => {
 
 // Debug Route (Restricted to Development)
 app.get('/api/debug', (req, res) => {
+  // SECURITY: Completely disable debug endpoint in production
+  // This prevents information leakage about server configuration
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({ error: 'Access denied' });
   }
+  
+  // SECURITY: Only expose non-sensitive information
+  // Never expose API key presence - this helps attackers target vulnerable services
   res.json({
-    mongodb: !!process.env.MONGODB_URI,
-    gnews: !!process.env.GNEWS_API_KEY,
-    weather: !!process.env.OPENWEATHER_API_KEY,
-    gemini: !!process.env.GEMINI_API_KEY,
-    env_keys: Object.keys(process.env).filter(k => !k.includes('PASS') && !k.includes('KEY') && !k.includes('SECRET'))
+    status: 'running',
+    nodeVersion: process.version,
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+    // REMOVED: API key presence checking - was a security risk
+    // Attackers can use key presence information to craft targeted attacks
   });
 });
 
@@ -71,18 +78,30 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/leaders', leaderRoutes);
 
 // Global Error Handler
+// SECURITY: Never expose internal error details to clients in production
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  console.error(`[${new Date().toISOString()}] ${req.method} ${req.url} >> Error ${statusCode}: ${err.message}`);
+  const timestamp = new Date().toISOString();
   
+  // Log full error details server-side for debugging
+  console.error(`[${timestamp}] ${req.method} ${req.url} >> Error ${statusCode}: ${err.message}`);
+  
+  // Only expose stack traces in development
   if (process.env.NODE_ENV !== 'production') {
-    console.error(err.stack);
+    console.error('Stack trace:', err.stack);
   }
 
+  // SECURITY: Generic error message for clients - prevents information leakage
+  const clientMessage = statusCode >= 500 
+    ? 'Internal Server Error' 
+    : err.message || 'An unexpected error occurred';
+
   res.status(statusCode).json({
-    error: err.message || 'Internal Server Error',
-    path: req.url,
-    timestamp: new Date().toISOString()
+    error: clientMessage,
+    timestamp: timestamp,
+    // Only include request path for debugging (not sensitive)
+    path: process.env.NODE_ENV !== 'production' ? req.url : undefined
+    // SECURITY: Never expose stack traces, internal paths, or system info to clients
   });
 });
 

@@ -4,6 +4,28 @@ const BoothReport = require('../models/BoothReport');
 const BoothInsight = require('../models/BoothInsight');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+// Server-side DOMPurify setup for XSS prevention
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
+
+/**
+ * SanitizeInput - XSS Prevention
+ * Uses DOMPurify to strip all malicious code from user inputs
+ * @param {string} input - Raw user input
+ * @returns {string} Sanitized output
+ */
+const sanitizeInput = (input) => {
+  if (typeof input !== 'string') return input;
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+  });
+};
 
 // Rate limiter for reporting (very restrictive to prevent spam)
 const reportLimiter = rateLimit({
@@ -79,10 +101,13 @@ router.post('/', reportLimiter, async (req, res) => {
       });
     }
 
-    // Basic sanitization
+// Comprehensive XSS prevention using DOMPurify
     const data = validation.data;
     if (data.description) {
-      data.description = data.description.replace(/[<>]/g, ''); // Simple XSS prevention
+      data.description = sanitizeInput(data.description);
+    }
+    if (data.reporterName) {
+      data.reporterName = sanitizeInput(data.reporterName);
     }
 
     const report = new BoothReport(data);

@@ -3,6 +3,12 @@ const router = express.Router();
 const axios = require('axios');
 const { z } = require('zod');
 
+const NodeCache = require('node-cache');
+
+// Cache weather for 15 minutes
+// Rounding to 2 decimal places (~1.1km) allows high cache reuse for users in the same vicinity
+const weatherCache = new NodeCache({ stdTTL: 900 });
+
 const CoordsSchema = z.object({
   lat: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-90).max(90)),
   lng: z.string().transform(v => parseFloat(v)).pipe(z.number().min(-180).max(180))
@@ -47,13 +53,23 @@ router.get('/', async (req, res) => {
     }
     const { lat, lng } = validation.data;
 
+    // Pillar: Efficiency (Coordinate-Based Cache Key)
+    // Rounding coordinates ensures users in the same neighborhood (~1km) share the cache
+    const cacheKey = `weather_${lat.toFixed(2)}_${lng.toFixed(2)}`;
+    const cachedData = weatherCache.get(cacheKey);
+    
+    if (cachedData) {
+      console.log(`[Cache Hit] Serving weather for ${cacheKey}`);
+      return res.json(cachedData);
+    }
+
     if (!process.env.OPENWEATHER_API_KEY || process.env.OPENWEATHER_API_KEY === 'placeholder') {
-      return res.status(401).json({ error: 'Weather API key missing', details: 'Please add a valid OPENWEATHER_API_KEY to your .env file' });
+      return res.status(401).json({ error: 'Weather API key missing' });
     }
 
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&appid=${process.env.OPENWEATHER_API_KEY}`,
-      { timeout: 5000 }
+      { timeout: 4000 }
     );
 
     const data = response.data;
@@ -62,7 +78,7 @@ router.get('/', async (req, res) => {
     const humidity = data.main.humidity;
     const { windows, alerts, isHeatwave } = computeSafeWindows(temp, feelsLike, humidity);
 
-    res.json({
+    const result = {
       temperature: Math.round(temp),
       feelsLike: Math.round(feelsLike),
       humidity,
@@ -73,11 +89,17 @@ router.get('/', async (req, res) => {
       city: data.name,
       isHeatwave,
       safeWindows: windows,
-      alerts
-    });
+      alerts,
+      timestamp: new Date().toISOString(),
+      source: 'OpenWeather API'
+    };
+
+    // Store in cache
+    weatherCache.set(cacheKey, result);
+    res.json(result);
   } catch (error) {
     console.error('Weather API error:', error.message);
-    res.status(500).json({ error: 'Failed to fetch weather data', details: error.message });
+    res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 });
 

@@ -66,7 +66,7 @@ router.get('/', async (req, res) => {
     const result = {
       state: stateName || 'National',
       isFallback: articles.length === 0 || (articles.length > 0 && !stateName),
-      articles: articles.length > 0 ? articles : MOCK_ARTICLES.map(a => ({ ...a, publishedAt: new Date().toISOString() })),
+      articles: (articles.length > 0 ? articles : MOCK_ARTICLES).map(a => ({ ...a, publishedAt: a.publishedAt || new Date().toISOString() })),
       totalArticles: articles.length || MOCK_ARTICLES.length
     };
 

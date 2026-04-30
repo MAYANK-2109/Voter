@@ -1,16 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from '../context/LocationContext';
 import api from '../utils/api';
 import { FiActivity, FiSend, FiThumbsUp, FiClock, FiMapPin, FiCamera, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const QUEUE_MAP = {
-  empty: { label: 'Empty', time: '0-5 min', color: 'text-success' },
-  short: { label: 'Short', time: '5-15 min', color: 'text-success' },
-  moderate: { label: 'Moderate', time: '15-45 min', color: 'text-warning' },
-  long: { label: 'Long', time: '45-90 min', color: 'text-danger' },
-  extreme: { label: 'Extreme', time: '90+ min', color: 'text-danger font-black' }
-};
+import { QUEUE_STATUS, generateNearbyBooths } from '../utils/constants';
 
 export default function BoothReporter() {
   const { coords, locationData } = useLocation();
@@ -151,7 +144,7 @@ export default function BoothReporter() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+      <div className="flex-1 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
         <AnimatePresence mode="wait">
           {showSuccess ? (
             <motion.div 
@@ -234,11 +227,11 @@ export default function BoothReporter() {
                         <span className={`badge ${safetyLabels[r.safetyStatus]} text-[8px] font-black`}>{r.safetyStatus}</span>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 mb-3">
+<div className="grid grid-cols-2 gap-4 mb-3">
                         <div className="bg-slate-50 p-2 rounded-xl">
                           <p className="text-[8px] text-text-muted uppercase font-bold mb-0.5">Est. Wait Time</p>
-                          <p className={`text-xs font-bold ${QUEUE_MAP[r.queueLength]?.color}`}>
-                            {QUEUE_MAP[r.queueLength]?.time || '5-15 min'}
+                          <p className={`text-xs font-bold ${QUEUE_STATUS[r.queueLength]?.color}`}>
+                            {QUEUE_STATUS[r.queueLength]?.time || '5-15 min'}
                           </p>
                         </div>
                         <div className="bg-slate-50 p-2 rounded-xl">

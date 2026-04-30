@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useLocation } from '../context/LocationContext';
 import { FiMap, FiNavigation, FiInfo, FiExternalLink, FiMapPin, FiClock, FiUsers, FiActivity, FiShield } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
+import { generateNearbyBooths } from '../utils/constants';
 
 // Fix for default marker icons in React-Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -72,41 +73,31 @@ export default function BoothFinder() {
     fetchInsight();
   }, [selectedBooth]);
 
-  useEffect(() => {
+useEffect(() => {
     if (!coords?.lat) return;
 
-    // Simulate nearby booths based on user location
-    const simulatedBooths = [
-      {
-        id: 1,
-        name: 'Government Primary School, East Wing',
-        lat: coords.lat + 0.002,
-        lng: coords.lng + 0.001,
-        distance: '450m',
-        crowd: 'Moderate',
-        address: 'Sector 4, Near Community Center'
-      },
-      {
-        id: 2,
-        name: 'Community Hall, Block B',
-        lat: coords.lat - 0.003,
-        lng: coords.lng - 0.002,
-        distance: '850m',
-        crowd: 'High',
-        address: 'MG Road, Opposite Police Station'
-      },
-      {
-        id: 3,
-        name: 'St. Xaviers High School, Auditorium',
-        lat: coords.lat + 0.001,
-        lng: coords.lng - 0.004,
-        distance: '1.2km',
-        crowd: 'Low',
-        address: 'Station Road, North Raipur'
-      }
-    ];
-    setBooths(simulatedBooths);
+    // Use shared utility function for booth generation (DRY principle)
+    const generatedBooths = generateNearbyBooths(coords);
+    // Add distance calculated from coordinates
+    const boothsWithDistance = generatedBooths.map(booth => ({
+      ...booth,
+      distance: calculateDistance(coords.lat, coords.lng, booth.lat, booth.lng)
+    }));
+    setBooths(boothsWithDistance);
   }, [coords]);
+
+  // EFFICIENCY: Memoized distance calculation
+  const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
+  };
 
   const openInGoogleMaps = (lat, lng) => {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
