@@ -37,8 +37,8 @@ router.get('/', async (req, res) => {
 
     // Fallback Query: If no state news, get general India election news
     if (articles.length === 0 && stateName) {
-      console.log(`No news for ${stateName}, falling back to general India election news...`);
-      query = 'Indian Elections 2024';
+      console.log(`No news for ${stateName}, falling back to national news...`);
+      query = 'National News India Election';
       response = await axios.get(
         `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&country=in&lang=en&max=10&apikey=${process.env.GNEWS_API_KEY}`,
         { timeout: 5000 }
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       state: stateName,
-      isFallback: articles.length > 0 && response.config.url.includes('Elections'),
+      isFallback: articles.length > 0 && query === 'National News India Election',
       articles: articles,
       totalArticles: articles.length
     });

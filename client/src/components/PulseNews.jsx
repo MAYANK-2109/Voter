@@ -49,9 +49,11 @@ export default function PulseNews() {
           <div>
             <h2 className="text-sm font-bold text-text-primary">Live Election Pulse</h2>
             <div className="flex items-center gap-2">
-              <p className="text-[10px] text-text-muted">{locationData?.state || 'Your State'}</p>
-              {isFallback && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-india-blue/10 text-india-blue font-semibold uppercase tracking-wider">National fallback</span>
+              <p className="text-[10px] text-text-muted">
+                {isFallback ? 'National News' : (locationData?.state || 'National News')}
+              </p>
+              {isFallback && locationData?.state && (
+                <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-text-muted font-semibold uppercase tracking-wider">State Unavailable</span>
               )}
             </div>
           </div>
