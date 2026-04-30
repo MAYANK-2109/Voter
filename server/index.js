@@ -13,8 +13,13 @@ const leaderRoutes = require('./routes/leaders');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
+
+// Health Check
+app.get('/', (req, res) => {
+  res.json({ status: 'active', message: 'VoterPath Server is running' });
+});
 
 // Request logging middleware
 app.use((req, res, next) => {
