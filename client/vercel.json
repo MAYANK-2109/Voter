@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://voterpth-server.onrender.com*"
+      "destination": "https://voterpath-server.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
