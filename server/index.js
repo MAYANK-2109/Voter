@@ -21,6 +21,17 @@ app.get('/', (req, res) => {
   res.json({ status: 'active', message: 'VoterPath Server is running' });
 });
 
+// Debug Route (Checks if API keys are present)
+app.get('/api/debug', (req, res) => {
+  res.json({
+    mongodb: !!process.env.MONGODB_URI,
+    gnews: !!process.env.GNEWS_API_KEY,
+    weather: !!process.env.OPENWEATHER_API_KEY,
+    gemini: !!process.env.GEMINI_API_KEY,
+    env_keys: Object.keys(process.env).filter(k => !k.includes('PASS') && !k.includes('KEY') && !k.includes('SECRET'))
+  });
+});
+
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);

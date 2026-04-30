@@ -24,7 +24,15 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('Location API error:', error.message);
-    res.status(500).json({ error: 'Failed to resolve location' });
+    // Fallback to a default location instead of failing
+    res.json({
+      city: 'Raipur',
+      state: 'Chhattisgarh',
+      district: 'Raipur',
+      country: 'India',
+      locality: '',
+      pincode: ''
+    });
   }
 });
 

@@ -16,6 +16,16 @@ router.get('/', async (req, res) => {
 
     // Primary Query: State specific
     let query = stateName ? `election ${stateName} India` : 'election India';
+    
+    if (!process.env.GNEWS_API_KEY) {
+      return res.json({
+        state: stateName,
+        isFallback: true,
+        articles: [],
+        message: 'GNEWS_API_KEY is missing'
+      });
+    }
+
     console.log(`Fetching primary news for: ${query}`);
     
     let response = await axios.get(
