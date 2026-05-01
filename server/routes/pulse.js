@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const NodeCache = require('node-cache');
+const crypto = require('crypto'); // added for hashing
 const fs = require('fs').promises;
 const path = require('path');
 const { MOCK_ARTICLES } = require('../data/mockNews');
@@ -10,40 +11,39 @@ const logger = require('../utils/logger');
 const newsCache = new NodeCache({ stdTTL: 600 });
 const FALLBACK_PATH = path.join(__dirname, '../data/newsFallback.json');
 
-/**
- * Standardizes articles from different APIs
- */
-const standardize = (articles) => {
-  return (articles || []).map(a => ({
+const standardize = (articles) =>
+  (articles || []).map(a => ({
     title: a.title || 'Election Update',
     description: a.description || a.snippet || 'Stay informed about the latest democratic pulse.',
     url: a.url || a.link || '#',
-    image: a.image || a.image_url || a.urlToImage || 'https://via.placeholder.com/800x450?text=Election+Update',
+    image: a.image || a.image_url || a.urlToImage || '/assets/news-placeholder.png',
     source: a.source?.name || a.source_id || 'News Wire',
-    publishedAt: a.publishedAt || a.pubDate || new Date().toISOString()
+    publishedAt: a.publishedAt || a.pubDate || new Date().toISOString(),
   })).slice(0, 10);
-};
 
-/**
- * Persists the last successful articles to a file
- */
+// In-memory hash to prevent unnecessary disk writes
+let lastFallbackHash = '';
+
 const persistFallback = async (articles) => {
   try {
     const top5 = articles.slice(0, 5);
-    await fs.writeFile(FALLBACK_PATH, JSON.stringify(top5, null, 2));
+    const currentHash = crypto.createHash('md5').update(JSON.stringify(top5)).digest('hex');
+    
+    // Efficiency: Only write to disk if articles have actually changed
+    if (currentHash !== lastFallbackHash) {
+      await fs.writeFile(FALLBACK_PATH, JSON.stringify(top5, null, 2));
+      lastFallbackHash = currentHash;
+    }
   } catch (err) {
     logger.error('Failed to persist news fallback', { error: err.message });
   }
 };
 
-/**
- * Loads persisted fallback articles
- */
 const loadFallback = async () => {
   try {
-    const data = await fs.readFile(FALLBACK_PATH, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
+    const raw = await fs.readFile(FALLBACK_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch {
     return MOCK_ARTICLES;
   }
 };
@@ -51,22 +51,24 @@ const loadFallback = async () => {
 router.get('/', async (req, res) => {
   try {
     const { lat, lng, state } = req.query;
-    let stateName = state;
+    let stateName = state ? String(state).slice(0, 100) : null;
 
-    // 1. Resolve State (cached)
     if (!stateName && lat && lng) {
       const cacheKey = `geo_${lat}_${lng}`;
       stateName = newsCache.get(cacheKey);
-      
+
       if (!stateName) {
         try {
           const locRes = await axios.get(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`,
-            { timeout: 2000 }
+            'https://api.bigdatacloud.net/data/reverse-geocode-client',
+            {
+              params: { latitude: parseFloat(lat), longitude: parseFloat(lng), localityLanguage: 'en' },
+              timeout: 2000,
+            }
           );
           stateName = locRes.data.principalSubdivision;
           newsCache.set(cacheKey, stateName, 3600 * 24);
-        } catch (e) {
+        } catch {
           stateName = 'India';
         }
       }
@@ -75,44 +77,45 @@ router.get('/', async (req, res) => {
     const query = stateName ? `election ${stateName} India` : 'election India';
     const cacheKey = `news_${query.replace(/\s+/g, '_')}`;
     const cached = newsCache.get(cacheKey);
-    if (cached) return res.json(cached);
+    if (cached) {
+      // Efficiency: Add Cache-Control header
+      res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+      return res.json(cached);
+    }
 
     let articles = [];
     let successProvider = null;
 
-    // 2. Primary Provider: GNews
     if (process.env.GNEWS_API_KEY) {
       try {
-        const response = await axios.get(
-          `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&country=in&lang=en&max=10&apikey=${process.env.GNEWS_API_KEY}`,
-          { timeout: 4000 }
-        );
+        const response = await axios.get('https://gnews.io/api/v4/search', {
+          params: { q: query, country: 'in', lang: 'en', max: 10, apikey: process.env.GNEWS_API_KEY },
+          timeout: 4000,
+        });
         if (response.data.articles?.length > 0) {
           articles = standardize(response.data.articles);
           successProvider = 'GNews';
         }
-      } catch (e) {
-        logger.warn('GNews failed, trying NewsData', { error: e.message });
+      } catch (err) {
+        logger.warn('GNews failed, trying NewsData', { error: err.message });
       }
     }
 
-    // 3. Secondary Provider: NewsData.io
     if (articles.length === 0 && process.env.NEWSDATA_API_KEY) {
       try {
-        const response = await axios.get(
-          `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_API_KEY}&q=${encodeURIComponent(query)}&country=in&language=en`,
-          { timeout: 4000 }
-        );
+        const response = await axios.get('https://newsdata.io/api/1/news', {
+          params: { apikey: process.env.NEWSDATA_API_KEY, q: query, country: 'in', language: 'en' },
+          timeout: 4000,
+        });
         if (response.data.results?.length > 0) {
           articles = standardize(response.data.results);
           successProvider = 'NewsData';
         }
-      } catch (e) {
-        logger.warn('NewsData failed', { error: e.message });
+      } catch (err) {
+        logger.warn('NewsData failed', { error: err.message });
       }
     }
 
-    // 4. Persistence & Fallback Logic
     if (articles.length > 0) {
       await persistFallback(articles);
     } else {
@@ -126,21 +129,21 @@ router.get('/', async (req, res) => {
       articles,
       provider: successProvider,
       totalArticles: articles.length,
-      ts: new Date().toISOString()
+      ts: new Date().toISOString(),
     };
 
     newsCache.set(cacheKey, result);
-    res.json(result);
-
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+    return res.json(result);
   } catch (error) {
     logger.error('Critical News API error', { error: error.message });
     const fallback = await loadFallback();
-    res.json({
+    return res.json({
       state: 'National',
       isFallback: true,
       articles: fallback,
       totalArticles: fallback.length,
-      message: 'System is busy, showing recent election updates'
+      message: 'System is busy, showing recent election updates',
     });
   }
 });

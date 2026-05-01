@@ -60,3 +60,16 @@
 {"error":"Operation `boothreports.find()` buffering timed out after 10000ms","level":"error","message":"Booth API error","service":"voterpath-api","stack":"MongooseError: Operation `boothreports.find()` buffering timed out after 10000ms\n    at Timeout.<anonymous> (C:\\Users\\mayan\\Documents\\GitHub\\Voter\\server\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\collection.js:187:23)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)","timestamp":"2026-04-30T23:30:37.754Z"}
 {"error":"Operation `boothreports.find()` buffering timed out after 10000ms","level":"error","message":"Booth API error","service":"voterpath-api","stack":"MongooseError: Operation `boothreports.find()` buffering timed out after 10000ms\n    at Timeout.<anonymous> (C:\\Users\\mayan\\Documents\\GitHub\\Voter\\server\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\collection.js:187:23)\n    at listOnTimeout (node:internal/timers:588:17)\n    at process.processTimers (node:internal/timers:523:7)","timestamp":"2026-04-30T23:33:38.256Z"}
 {"error":"Request failed with status code 403","level":"warn","message":"GNews failed, trying NewsData","service":"voterpath-api","timestamp":"2026-04-30T23:34:29.808Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:53:52.665Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:53:57.664Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:53:58.704Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:55:06.006Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:55:07.078Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:58:02.205Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:58:03.262Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:58:29.099Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:58:30.097Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:58:40.044Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:58:40.918Z"}
+{"level":"info","message":"VoterPath server running on port 5001","service":"voterpath-api","timestamp":"2026-05-01T07:58:48.196Z"}
+{"level":"info","message":"Connected to MongoDB Atlas","service":"voterpath-api","timestamp":"2026-05-01T07:58:49.046Z"}

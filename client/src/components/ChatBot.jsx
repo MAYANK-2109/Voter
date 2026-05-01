@@ -14,20 +14,31 @@ const QUICK_ACTIONS = [
 
 function TypewriterText({ text, speed = 25, onComplete }) {
   const [displayedText, setDisplayedText] = useState('');
-  const words = useRef(text.split(' '));
-  const index = useRef(0);
-
+  
   useEffect(() => {
+    // Escape key handler for ChatBot (modal) accessibility
+    const onKey = (e) => e.key === 'Escape' && document.querySelector('button[aria-label="Close Chat"]')?.click();
+    window.addEventListener('keydown', onKey);
+
+    const wordsArray = text.split(' ');
+    let currentIndex = 0;
+    
+    // Efficiency: batch 2 words at a time for faster/smoother rendering without lag
     const interval = setInterval(() => {
-      if (index.current < words.current.length) {
-        setDisplayedText(prev => prev + (index.current === 0 ? '' : ' ') + words.current[index.current]);
-        index.current++;
+      if (currentIndex < wordsArray.length) {
+        const nextWords = wordsArray.slice(currentIndex, currentIndex + 2).join(' ');
+        setDisplayedText(prev => prev + (currentIndex === 0 ? '' : ' ') + nextWords);
+        currentIndex += 2;
       } else {
         clearInterval(interval);
         if (onComplete) onComplete();
       }
-    }, speed);
-    return () => clearInterval(interval);
+    }, speed * 1.5); // Slightly longer interval but 2 words per tick
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('keydown', onKey);
+    };
   }, [text, speed, onComplete]);
 
   return <ReactMarkdown>{displayedText}</ReactMarkdown>;
@@ -54,13 +65,16 @@ export default function ChatBot({ onClose }) {
     if (!text.trim() || loading) return;
 
     const userMsg = { role: 'user', text: text.trim(), isTyping: false };
+
+    // Snapshot history BEFORE appending userMsg — the server needs prior turns only
+    const historySnapshot = messages.map(m => ({ role: m.role, text: m.text }));
+
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
     try {
-      const history = messages.map(m => ({ role: m.role, text: m.text }));
-      const res = await api.post('/chat', { message: text.trim(), history });
+      const res = await api.post('/chat', { message: text.trim(), history: historySnapshot });
       setMessages(prev => [...prev, { role: 'model', text: res.data.reply, isTyping: true }]);
     } catch (err) {
       const errMsg = err.response?.data?.error || 'Failed to get response. Please try again.';
@@ -157,6 +171,7 @@ export default function ChatBot({ onClose }) {
               {QUICK_ACTIONS.map((qa, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => sendMessage(qa.message)}
                   className="text-[10px] px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50 text-text-secondary hover:border-saffron hover:text-saffron transition-all cursor-pointer shrink-0"
                 >

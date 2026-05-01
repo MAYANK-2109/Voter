@@ -49,4 +49,18 @@ describe('Weather Route - 100% Branch Coverage Test', () => {
     const res = await request(app).get('/api/weather?lat=50.00&lng=60.00');
     expect(res.status).toBe(500);
   });
+
+  it('should return 503 when circuit breaker is open', async () => {
+    vi.stubEnv('OPENWEATHER_API_KEY', 'valid_test_key_breaker');
+    axios.get.mockRejectedValue(new Error('Persistent Failure'));
+
+    // Trigger failure threshold (default 3)
+    await request(app).get('/api/weather?lat=1.0&lng=1.0');
+    await request(app).get('/api/weather?lat=1.0&lng=1.0');
+    await request(app).get('/api/weather?lat=1.0&lng=1.0');
+
+    const res = await request(app).get('/api/weather?lat=1.0&lng=1.0');
+    expect(res.status).toBe(503);
+    expect(res.body.error).toBe('SERVICE_RECOVERY');
+  });
 });

@@ -175,3 +175,9 @@ body {
   opacity: 0.03;
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50m-40 0a40 40 0 1 0 80 0a40 40 0 1 0 -80 0M50 10l5 5l-5 5l-5 -5zM90 50l-5 5l-5 -5l5 -5zM50 90l-5 -5l5 -5l5 5zM10 50l5 -5l5 5l-5 5z' fill='%23000080' fill-opacity='1'/%3E%3C/svg%3E");
 }
+
+/* Accessibility: Clear focus indicators for keyboard navigation */
+*:focus-visible { 
+  outline: 2px solid var(--color-saffron); 
+  outline-offset: 2px; 
+}

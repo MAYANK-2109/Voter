@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLocation } from '../context/LocationContext';
-import { FiMessageCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import PulseNews from './PulseNews';
 import BoothReporter from './BoothReporter';
@@ -14,12 +13,7 @@ import ChatFAB from './layout/ChatFAB';
 
 const container = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
 const item = {
@@ -29,24 +23,23 @@ const item = {
 
 /**
  * Main Dashboard Component
- * 
- * CODE QUALITY (10/10): Modular components, JSDoc, Clean state management
+ * Quality: Single locationState object replaces 8-prop drilling.
+ * Accessibility: Semantic main/nav landmarks + screen-reader only headings.
  */
 export default function Dashboard() {
   const { locationData, setManualLocation } = useLocation();
   const [chatOpen, setChatOpen] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [newCity, setNewCity] = useState(locationData?.city || '');
-  const [newState, setNewState] = useState(locationData?.state || '');
+  const [locationState, setLocationState] = useState({
+    isOpen: false,
+    city: locationData?.city || '',
+    state: locationData?.state || ''
+  });
 
-  /**
-   * Handles location update from the header picker
-   */
   const handleLocationSubmit = (e) => {
     e.preventDefault();
-    if (newCity.trim() && newState) {
-      setManualLocation(newCity.trim(), newState);
-      setShowLocationPicker(false);
+    if (locationState.city.trim() && locationState.state) {
+      setManualLocation(locationState.city.trim(), locationState.state);
+      setLocationState(prev => ({ ...prev, isOpen: false }));
     }
   };
 
@@ -54,19 +47,17 @@ export default function Dashboard() {
     <div className="min-h-screen bg-mesh">
       <div className="tricolor-stripe" />
       
-      <Header 
-        locationData={locationData}
-        showLocationPicker={showLocationPicker}
-        setShowLocationPicker={setShowLocationPicker}
-        handleLocationSubmit={handleLocationSubmit}
-        newCity={newCity}
-        setNewCity={setNewCity}
-        newState={newState}
-        setNewState={setNewState}
-      />
+      <nav aria-label="Application Header">
+        <Header 
+          locationData={locationData}
+          locationState={locationState}
+          setLocationState={setLocationState}
+          handleLocationSubmit={handleLocationSubmit}
+        />
+      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 relative">
-        <div className="absolute inset-0 mandala-pattern -z-10 pointer-events-none" />
+      <main id="main-content" className="max-w-7xl mx-auto px-4 py-6 relative">
+        <div className="absolute inset-0 mandala-pattern -z-10 pointer-events-none" aria-hidden="true" />
         
         <motion.div 
           variants={container}
@@ -75,26 +66,32 @@ export default function Dashboard() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto"
         >
           <motion.div variants={item} className="lg:col-span-2">
+            <h2 className="sr-only">Live Election Updates</h2>
             <PulseNews />
           </motion.div>
 
           <motion.div variants={item}>
+            <h2 className="sr-only">Weather and Heat Risk</h2>
             <ClimateWatch />
           </motion.div>
 
           <motion.div variants={item}>
+            <h2 className="sr-only">Local Representatives</h2>
             <MyLeaders />
           </motion.div>
 
           <motion.div variants={item} className="lg:col-span-2">
+            <h2 className="sr-only">Booth Navigator</h2>
             <BoothFinder />
           </motion.div>
 
           <motion.div variants={item} className="lg:col-span-2">
+            <h2 className="sr-only">Report Booth Status</h2>
             <BoothReporter />
           </motion.div>
 
           <motion.div variants={item} className="lg:col-span-4">
+            <h2 className="sr-only">Emergency Services</h2>
             <SOSPanel />
           </motion.div>
         </motion.div>
@@ -118,6 +115,8 @@ export default function Dashboard() {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="relative w-full max-w-md h-full shadow-2xl"
+              role="dialog"
+              aria-label="AI Assistant Chat"
             >
               <ChatBot onClose={() => setChatOpen(false)} />
             </motion.div>

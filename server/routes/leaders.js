@@ -1,46 +1,108 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const leadersData = require('../data/leaders.json');
+const NodeCache = require('node-cache');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const logger = require('../utils/logger');
+const leadersData = require('../data/leaders.json');
 
-async function getAIInfo(apiKey, modelId, prompt) {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: modelId });
+// Lazy singleton — same pattern as chat.js to survive any require() order
+let _genAI = null;
+const getGenAI = () => {
+  if (!_genAI) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new Error('GEMINI_API_KEY is not configured');
+    _genAI = new GoogleGenerativeAI(key);
+  }
+  return _genAI;
+};
+
+// Fix #12: 1-hour TTL cache keyed by stateKey+cityKey — eliminates redundant
+// geocode and Wikipedia roundtrips on every request
+const leaderCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+
+// Fallback model sequence — cheapest first
+const AI_MODEL_SEQUENCE = ['gemini-1.5-flash', 'gemini-1.5-pro'];
+
+/**
+ * Generates a factual, non-partisan biography using the Gemini API.
+ * Uses the module-level singleton (Fix #8).
+ *
+ * @param {string} modelId
+ * @param {string} prompt - Pre-sanitized prompt string
+ * @returns {Promise<string>}
+ */
+async function generateLeaderBio(modelId, prompt) {
+  const model = getGenAI().getGenerativeModel({ model: modelId });
   const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text();
+  return result.response.text();
 }
 
-async function getLeaderImage(name) {
+/**
+ * Fetches the Wikipedia thumbnail for a given leader name.
+ * Silently returns null on any failure — image is non-critical.
+ *
+ * @param {string} name
+ * @returns {Promise<string|null>}
+ */
+async function fetchWikipediaThumbnail(name) {
   try {
-    const wikiRes = await axios.get(
+    const response = await axios.get(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`,
       { timeout: 3000 }
     );
-    return wikiRes.data.thumbnail?.source || null;
-  } catch (err) {
+    return response.data.thumbnail?.source || null;
+  } catch {
     return null;
   }
 }
+
+/**
+ * Strips characters not safe for use inside an LLM prompt.
+ * Prevents prompt-injection via crafted query parameters (Fix #6).
+ */
+const sanitizeForPrompt = (value, maxLength) =>
+  String(value || '')
+    .replace(/[^\w\s.'\-,]/g, '')
+    .slice(0, maxLength);
 
 router.get('/', async (req, res) => {
   try {
     const { lat, lng, state, city } = req.query;
 
-    let stateName = state;
-    let cityName = city;
+    let stateName = state ? String(state).slice(0, 100) : null;
+    let cityName  = city  ? String(city).slice(0, 100)  : null;
 
+    // Fix #5: Validate coordinates before any outbound HTTP call
     if (!stateName && lat && lng) {
+      const parsedLat = parseFloat(lat);
+      const parsedLng = parseFloat(lng);
+
+      if (
+        isNaN(parsedLat) || isNaN(parsedLng) ||
+        parsedLat < -90  || parsedLat > 90   ||
+        parsedLng < -180 || parsedLng > 180
+      ) {
+        return res.status(400).json({ error: 'INVALID_COORDINATES' });
+      }
+
+      // Fix #5: Enforce a request timeout on the geocode call
       const locRes = await axios.get(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+        'https://api.bigdatacloud.net/data/reverse-geocode-client',
+        {
+          params: { latitude: parsedLat, longitude: parsedLng, localityLanguage: 'en' },
+          timeout: 3000,
+        }
       );
       stateName = locRes.data.principalSubdivision;
-      cityName = cityName || locRes.data.city || locRes.data.locality;
+      cityName  = cityName || locRes.data.city || locRes.data.locality || null;
     }
 
     if (!stateName) {
-      return res.status(400).json({ error: 'Could not determine state. Provide lat/lng or state.' });
+      return res.status(400).json({
+        error: 'MISSING_LOCATION',
+        message: 'Could not determine state. Provide lat/lng or state.',
+      });
     }
 
     const stateKey = Object.keys(leadersData.states).find(
@@ -51,15 +113,16 @@ router.get('/', async (req, res) => {
       return res.status(404).json({ error: `No data found for state: ${stateName}` });
     }
 
-    const stateData = leadersData.states[stateKey];
-    const result = {
-      state: stateKey,
-      city: cityName || null,
-      leaders: []
-    };
+    // Fix #12: Return cached leader list if available
+    const cacheKey = `leaders_${stateKey}_${cityName || 'none'}`;
+    const cached = leaderCache.get(cacheKey);
+    if (cached) return res.json(cached);
 
-    if (stateData.cm) result.leaders.push({ role: 'Chief Minister', ...stateData.cm });
-    if (stateData.governor) result.leaders.push({ role: 'Governor', ...stateData.governor });
+    const stateData = leadersData.states[stateKey];
+    const leaderList = [];
+
+    if (stateData.cm)       leaderList.push({ role: 'Chief Minister', ...stateData.cm });
+    if (stateData.governor) leaderList.push({ role: 'Governor',       ...stateData.governor });
 
     if (cityName && stateData.cities) {
       const cityKey = Object.keys(stateData.cities).find(
@@ -67,30 +130,35 @@ router.get('/', async (req, res) => {
       );
       if (cityKey) {
         const cityData = stateData.cities[cityKey];
-        result.city = cityKey;
-        if (cityData.mayor) result.leaders.push({ role: 'Mayor', city: cityKey, ...cityData.mayor });
-        if (cityData.mp) result.leaders.push({ role: 'Member of Parliament', city: cityKey, ...cityData.mp });
-        if (cityData.collector) result.leaders.push({ role: 'District Collector', city: cityKey, ...cityData.collector });
+        cityName = cityKey; // normalise to canonical casing
+        if (cityData.mayor)     leaderList.push({ role: 'Mayor',                city: cityKey, ...cityData.mayor });
+        if (cityData.mp)        leaderList.push({ role: 'Member of Parliament', city: cityKey, ...cityData.mp });
+        if (cityData.collector) leaderList.push({ role: 'District Collector',   city: cityKey, ...cityData.collector });
       }
     }
 
-    // Add thumbnails to the initial list if available
-    for (let leader of result.leaders) {
-       leader.image = await getLeaderImage(leader.name);
-    }
+    // Fix #11: Fetch all Wikipedia thumbnails in parallel instead of sequentially,
+    // cutting response time from O(n × latency) to O(max latency).
+    const thumbnailResults = await Promise.allSettled(
+      leaderList.map(leader => fetchWikipediaThumbnail(leader.name))
+    );
+    const leaders = leaderList.map((leader, i) => ({
+      ...leader,
+      image: thumbnailResults[i].status === 'fulfilled' ? thumbnailResults[i].value : null,
+    }));
 
-    res.json(result);
+    const result = { state: stateKey, city: cityName || null, leaders };
+
+    leaderCache.set(cacheKey, result); // Fix #12
+    // Efficiency: Cache-Control for 1 hour as leader data is static
+    res.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=300');
+    return res.json(result);
   } catch (error) {
-    console.error('Leaders API error:', error.message);
-    // Fallback to state-level data if possible, or a generic response
-    res.json({
-      state: req.query.state || 'Chhattisgarh',
-      city: req.query.city || 'Raipur',
-      leaders: [
-        { role: 'Chief Minister', name: 'Vishnu Deo Sai', party: 'BJP' },
-        { role: 'Governor', name: 'Ramen Deka', party: 'Independent' }
-      ],
-      message: 'Using fallback leader data'
+    // Fix #9/#21: Structured log; no hardcoded politician fallback
+    logger.error('Leaders GET error', { error: error.message });
+    return res.status(503).json({
+      error: 'SERVICE_UNAVAILABLE',
+      message: 'Leader data temporarily unavailable. Please try again shortly.',
     });
   }
 });
@@ -99,36 +167,48 @@ router.get('/info', async (req, res) => {
   const { name, role, state, city } = req.query;
   if (!name) return res.status(400).json({ error: 'Name is required' });
 
-  const prompt = `Provide a concise, factual, non-partisan biography of about 70 words for ${name}, who is the ${role} of ${city ? city + ', ' : ''}${state}, India. Focus on their political career, key roles, and major contributions. Maintain a neutral tone.`;
+  // Fix #6: Sanitize all query params before building the AI prompt
+  const safeName  = sanitizeForPrompt(name,  100);
+  const safeRole  = sanitizeForPrompt(role,   50);
+  const safeState = sanitizeForPrompt(state,  50);
+  const safeCity  = sanitizeForPrompt(city,   50);
 
-  const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
-  let lastError = null;
-  let infoText = '';
+  if (!safeName) return res.status(400).json({ error: 'INVALID_NAME' });
+
+  const prompt = [
+    `Provide a concise, factual, non-partisan biography of about 70 words for ${safeName},`,
+    `who is the ${safeRole} of ${safeCity ? safeCity + ', ' : ''}${safeState}, India.`,
+    'Focus on their political career, key roles, and major contributions.',
+    'Maintain a neutral tone. Do not add any content beyond this biography.',
+  ].join(' ');
+
+  let bioText  = '';
   let modelUsed = '';
+  let lastError = null;
 
-  for (const modelId of models) {
+  for (const modelId of AI_MODEL_SEQUENCE) {
     try {
-      console.log(`Fetching leader info with model: ${modelId}`);
-      infoText = await getAIInfo(process.env.GEMINI_API_KEY, modelId, prompt);
+      logger.info('Fetching leader bio', { modelId, name: safeName });
+      bioText   = await generateLeaderBio(modelId, prompt);
       modelUsed = modelId;
-      break; 
+      break;
     } catch (error) {
-      console.error(`Leader info model ${modelId} failed:`, error.message);
+      logger.warn('Leader bio model failed', { modelId, error: error.message });
       lastError = error;
     }
   }
 
-  if (!infoText) {
-    return res.status(500).json({ error: 'Failed to fetch leader information.', details: lastError?.message });
+  if (!bioText) {
+    return res.status(503).json({
+      error: 'Failed to fetch leader information.',
+      message: 'All AI models are currently unavailable.',
+    });
   }
 
-  const imageUrl = await getLeaderImage(name);
+  // Thumbnail fetch is non-critical — run independently of bio
+  const imageUrl = await fetchWikipediaThumbnail(safeName);
 
-  res.json({ 
-    info: infoText, 
-    image: imageUrl,
-    model: modelUsed 
-  });
+  return res.json({ info: bioText, image: imageUrl, model: modelUsed });
 });
 
 module.exports = router;
